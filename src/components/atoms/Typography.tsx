@@ -19,7 +19,7 @@ export const SectionTitle: React.FC<TextProps> = ({ children, className = '' }) 
 );
 
 export const Heading: React.FC<TextProps & { level?: 1 | 2 | 3 | 4 }> = ({ children, className = '', level = 2 }) => {
-  const Tag = `h${level}` as keyof JSX.IntrinsicElements;
+  const Tag = `h${level}` as React.ElementType;
   const sizes = {
     1: 'text-huge', // Custom class from globals/tailwind?
     2: 'text-3xl md:text-5xl',

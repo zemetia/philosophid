@@ -107,8 +107,8 @@ export const HeroSection: React.FC = () => {
         {/* Primary Typography Layer (Behind and Overlapping) */}
         <div className="relative z-20 flex flex-col">
           <Heading level={1} className="parallax-text flex flex-col pointer-events-none">
-            <span className="reveal-element">Thinking</span>
-            <span className="reveal-element -mt-[0.2em] outline-text opacity-80">Logos</span>
+            <span className="reveal-element">Philo</span>
+            <span className="reveal-element -mt-[0.2em] outline-text ">sophid</span>
           </Heading>
         </div>
 
@@ -136,8 +136,8 @@ export const HeroSection: React.FC = () => {
         <div className="sculpture-figure relative w-full h-full sculpture-mask">
           {/* Using a high-quality Greek Philosopher sculpture image that mimics the "Thinker" pose */}
           <Image 
-            src="https://images.unsplash.com/photo-1594142404563-64cccaf5a10f?q=80&w=2000&auto=format&fit=crop" 
-            alt="Socrates Thinker Sculpture" 
+            src="/images/philosopher.png" 
+            alt="Greek Philosopher Rationalizing Existence" 
             fill
             className="object-contain grayscale contrast-[1.1] brightness-[1.05]"
             priority
@@ -155,21 +155,7 @@ export const HeroSection: React.FC = () => {
         </div>
       </div>
 
-      <style jsx>{`
-        .outline-text {
-          -webkit-text-stroke: 1px black;
-          color: transparent;
-        }
-        
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
 
-        .reveal-element {
-          will-change: transform, opacity;
-        }
-      `}</style>
     </section>
   );
 };

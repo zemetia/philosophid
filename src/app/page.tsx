@@ -1,9 +1,9 @@
 
 "use client";
 import React from 'react';
-import { Hero } from '@/components/Hero';
-import { ArticleCard } from '@/components/ArticleCard';
-import { CompetitionTimeline } from '@/components/CompetitionTimeline';
+import { HeroSection } from '@/components/organisms/HeroSection';
+import { ArticleCard } from '@/components/organisms/ArticleCard';
+import { CompetitionTimeline } from '@/components/organisms/CompetitionTimeline';
 import { MOCK_POSTS, CURRENT_COMPETITION } from '@/lib/constants';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -11,7 +11,7 @@ import Image from 'next/image';
 export default function Home() {
   return (
     <>
-      <Hero />
+      <HeroSection />
       
       {/* Manifesto / Introduction */}
       <section className="bg-white border-y-2 border-black py-24 relative overflow-hidden">

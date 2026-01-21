@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Literata, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import clsx from "clsx";
-import { ClientLayout } from "@/components/ClientLayout";
+import { PageTemplate } from "@/components/templates/PageTemplate";
 
 const literata = Literata({
   variable: "--font-literata",
@@ -18,6 +18,11 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Philoshopid | Rational Clarity",
   description: "We seek the immutable logic within the chaos of the digital manifold.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -34,9 +39,9 @@ export default function RootLayout({
          "antialiased min-h-screen selection:bg-[#4E6E81] selection:text-white"
         )}
       >
-        <ClientLayout>
+        <PageTemplate>
           {children}
-        </ClientLayout>
+        </PageTemplate>
         <div className="noise-overlay"></div>
       </body>
     </html>

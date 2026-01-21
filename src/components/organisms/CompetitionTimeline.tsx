@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { COMPETITION_TYPES } from '@/lib/constants';
+import { Heading, MetaText } from '../atoms/Typography';
 
 export const CompetitionTimeline: React.FC = () => {
   return (
@@ -8,12 +9,12 @@ export const CompetitionTimeline: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-end mb-32 border-b border-white/10 pb-12">
            <div>
-              <span className="font-ui text-[10px] uppercase tracking-[0.5em] text-[#4E6E81] font-bold block mb-4">Inquiry Frameworks</span>
-              <h2 className="font-ui text-5xl md:text-7xl font-bold uppercase tracking-tighter">Participation</h2>
+              <MetaText className="text-[#4E6E81] tracking-[0.5em] block mb-4">Inquiry Frameworks</MetaText>
+              <Heading level={2} className="text-white">Participation</Heading>
            </div>
-           <p className="font-ui text-[10px] uppercase tracking-widest text-[#8E8E8E] max-w-xs text-right hidden md:block">
+           <MetaText className="text-[#8E8E8E] max-w-xs text-right hidden md:block tracking-widest">
               Three tiers of contribution, each serving a distinct structural purpose in our shared dialectic.
-           </p>
+           </MetaText>
         </div>
 
         <div className="relative">
@@ -31,13 +32,13 @@ export const CompetitionTimeline: React.FC = () => {
                 {/* Content Area */}
                 <div className="w-full md:w-1/2 pl-24 md:pl-0 md:px-16 pt-2">
                   <div className={`p-10 border border-white/10 hover:border-[#4E6E81] transition-all duration-500 bg-[#121212]/50 backdrop-blur-sm group ${idx % 2 === 1 ? 'md:text-right' : ''}`}>
-                    <span className="font-ui text-[10px] uppercase tracking-[0.4em] text-[#8E8E8E] block mb-4 group-hover:text-white transition-colors">{comp.frequency}</span>
-                    <h3 className="font-ui text-3xl md:text-4xl font-bold uppercase tracking-tighter mb-6 leading-none">{comp.title}</h3>
+                    <MetaText className="mb-4 group-hover:text-white transition-colors tracking-[0.4em] text-[#8E8E8E] block">{comp.frequency}</MetaText>
+                    <Heading level={3} className="text-white mb-6 font-bold">{comp.title}</Heading>
                     <p className="font-serif text-lg opacity-60 leading-relaxed mb-8">{comp.description}</p>
                     <div className={`pt-6 border-t border-white/10 ${idx % 2 === 1 ? 'md:flex md:justify-end' : ''}`}>
                       <div className="max-w-xs">
-                        <span className="font-ui text-[9px] uppercase tracking-widest text-[#4E6E81] block mb-2 font-bold">Standard Requirement:</span>
-                        <p className="font-ui text-[11px] uppercase tracking-widest opacity-40 leading-relaxed">{comp.requirements}</p>
+                        <MetaText className="text-[#4E6E81] tracking-widest mb-2 block">Standard Requirement:</MetaText>
+                        <MetaText className="opacity-40 tracking-widest text-[11px]">{comp.requirements}</MetaText>
                       </div>
                     </div>
                   </div>

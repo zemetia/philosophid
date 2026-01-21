@@ -55,7 +55,7 @@ export default function LoginPage() {
             
             <h1 className="text-huge font-bold uppercase tracking-tighter text-black flex flex-col pointer-events-none mb-12">
               <span className="reveal-element">Access</span>
-              <span className="reveal-element -mt-[0.2em] outline-text opacity-80">Logos</span>
+              <span className="reveal-element -mt-[0.2em] outline-text opacity-50">Logos</span>
             </h1>
           </div>
 
@@ -146,15 +146,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <style jsx>{`
-        .outline-text {
-          -webkit-text-stroke: 1px black;
-          color: transparent;
-        }
-        .reveal-element {
-          will-change: transform, opacity;
-        }
-      `}</style>
+
     </section>
   );
 }

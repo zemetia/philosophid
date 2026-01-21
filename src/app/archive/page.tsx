@@ -2,7 +2,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import { MOCK_POSTS } from '@/lib/constants';
-import { ArticleCard } from '@/components/ArticleCard';
+import { ArticleCard } from '@/components/organisms/ArticleCard';
 import { ContentCategory, Post } from '@/lib/types';
 import gsap from 'gsap';
 

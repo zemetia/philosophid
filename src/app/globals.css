@@ -1,4 +1,3 @@
-
 @import "tailwindcss";
 
 :root {
@@ -37,18 +36,20 @@ body {
 /* Simplified Grid Background */
 .grid-pattern {
   background-size: 60px 60px;
-  background-image: 
-      linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--bg-base);
 }
+
 ::-webkit-scrollbar-thumb {
   background: #000;
 }
@@ -78,4 +79,24 @@ body {
   .reveal-item {
     /* To be controlled by GSAP */
   }
+}
+
+/* Hero Section Styles */
+.outline-text {
+  -webkit-text-stroke: 2px black;
+  color: transparent;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.reveal-element {
+  will-change: transform, opacity;
 }

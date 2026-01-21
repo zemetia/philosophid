@@ -1,6 +1,6 @@
 
 import { MOCK_POSTS } from '@/lib/constants';
-import { ArticleDetailView } from '@/components/ArticleLayouts';
+import { ArticleDetailView } from '@/components/templates/ArticleTemplates';
 import { notFound } from 'next/navigation';
 
 export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
