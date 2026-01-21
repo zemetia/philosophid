@@ -1,0 +1,81 @@
+
+@import "tailwindcss";
+
+:root {
+  --bg-base: #F4F2ED;
+  --text-primary: #121212;
+  --aegean-blue: #4E6E81;
+  --stone: #8E8E8E;
+  --accent: #121212;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-literata), serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.font-ui {
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+
+/* Grain Overlay */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Simplified Grid Background */
+.grid-pattern {
+  background-size: 60px 60px;
+  background-image: 
+      linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: #000;
+}
+
+.text-huge {
+  font-size: clamp(4rem, 15vw, 20rem);
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+}
+
+.vertical-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+/* Minimal Brutalist Elements */
+.brutalist-border {
+  border: 2px solid #000;
+}
+
+.sculpture-mask {
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+@layer utilities {
+  .reveal-item {
+    /* To be controlled by GSAP */
+  }
+}
