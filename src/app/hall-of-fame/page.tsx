@@ -1,7 +1,7 @@
 
 "use client";
 import React, { useEffect, useRef } from 'react';
-import { DETAILED_HALL_OF_FAME, JURY_NOTES } from '@/lib/constants';
+import { DETAILED_HALL_OF_FAME, JURY_NOTES } from '../../lib/constants';
 import gsap from 'gsap';
 import Image from 'next/image';
 
@@ -214,12 +214,6 @@ export default function HallOfFamePage() {
         </footer>
       </div>
       
-      <style jsx>{`
-        .outline-text {
-          -webkit-text-stroke: 1px black;
-          color: transparent;
-        }
-      `}</style>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 
 "use client";
 import React, { useEffect, useRef } from 'react';
-import { COMPETITION_TYPES, CURRENT_COMPETITION } from '@/lib/constants';
+import { COMPETITION_TYPES, CURRENT_COMPETITION } from '../../lib/constants';
 import gsap from 'gsap';
 
 export default function CompetitionsPage() {

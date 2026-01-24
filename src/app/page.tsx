@@ -1,10 +1,10 @@
 
 "use client";
 import React from 'react';
-import { HeroSection } from '@/components/organisms/HeroSection';
-import { ArticleCard } from '@/components/organisms/ArticleCard';
-import { CompetitionTimeline } from '@/components/organisms/CompetitionTimeline';
-import { MOCK_POSTS, CURRENT_COMPETITION } from '@/lib/constants';
+import { HeroSection } from '../components/organisms/HeroSection';
+import { ArticleCard } from '../components/organisms/ArticleCard';
+import { CompetitionTimeline } from '../components/organisms/CompetitionTimeline';
+import { MOCK_POSTS, CURRENT_COMPETITION } from '../lib/constants';
 import Link from 'next/link';
 import Image from 'next/image';
 

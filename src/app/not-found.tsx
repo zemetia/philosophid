@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heading, MetaText } from '@/components/atoms/Typography';
+import { Heading, MetaText } from '../components/atoms/Typography';
 
 export default function NotFound() {
   return (

@@ -163,15 +163,6 @@ export default function RegistrationPage() {
         </div>
       </div>
 
-      <style jsx>{`
-        .outline-text {
-          -webkit-text-stroke: 1px black;
-          color: transparent;
-        }
-        .wizard-step-reveal {
-          will-change: transform, opacity;
-        }
-      `}</style>
     </section>
   );
 }

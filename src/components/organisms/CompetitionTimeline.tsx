@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { COMPETITION_TYPES } from '@/lib/constants';
+import { COMPETITION_TYPES } from '../../lib/constants';
 import { Heading, MetaText } from '../atoms/Typography';
 
 export const CompetitionTimeline: React.FC = () => {

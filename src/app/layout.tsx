@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Literata, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import clsx from "clsx";
-import { PageTemplate } from "@/components/templates/PageTemplate";
+import { PageTemplate } from "../components/templates/PageTemplate";
 
 const literata = Literata({
   variable: "--font-literata",

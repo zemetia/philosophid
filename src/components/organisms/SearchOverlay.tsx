@@ -1,8 +1,8 @@
 
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { MOCK_POSTS } from '@/lib/constants';
-import { Post } from '@/lib/types';
+import { MOCK_POSTS } from '../../lib/constants';
+import { Post } from '../../lib/types';
 import gsap from 'gsap';
 import { useRouter } from 'next/navigation';
 import { MetaText, Heading } from '../atoms/Typography';

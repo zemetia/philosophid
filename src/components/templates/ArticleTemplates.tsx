@@ -1,7 +1,7 @@
 
 "use client";
 import React, { useRef } from 'react';
-import { Post } from '@/lib/types';
+import { Post } from '../lib/types';
 import Image from 'next/image';
 import { BackButton } from '../molecules/BackButton';
 import { SocialSharing } from '../molecules/SocialSharing';

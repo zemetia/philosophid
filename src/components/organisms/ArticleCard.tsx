@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Post } from '@/lib/types';
+import { Post } from '../lib/types';
 import Link from 'next/link';
 import { Heading } from '../atoms/Typography';
 import { ArticleMeta } from '../molecules/ArticleMeta';
