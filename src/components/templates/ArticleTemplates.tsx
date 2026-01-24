@@ -1,11 +1,11 @@
 
 "use client";
 import React, { useRef } from 'react';
-import { Post } from '../lib/types';
+import { Post } from '../../lib/types';
 import Image from 'next/image';
 import { BackButton } from '../molecules/BackButton';
 import { SocialSharing } from '../molecules/SocialSharing';
-import { useRevealAnimation } from '@/hooks/useRevealAnimation';
+import { useRevealAnimation } from '../../hooks/useRevealAnimation';
 import { Heading, MetaText } from '../atoms/Typography';
 
 interface LayoutProps {
