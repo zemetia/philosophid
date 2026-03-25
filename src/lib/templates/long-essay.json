@@ -1,0 +1,60 @@
+[
+  {
+    "type": "heading",
+    "props": { "level": 1 },
+    "content": [{ "type": "text", "text": "Formal Title of the Essay", "styles": {} }]
+  },
+  {
+    "type": "paragraph",
+    "content": [
+      { "type": "text", "text": "Abstract: ", "styles": { "bold": true } },
+      { "type": "text", "text": "Provide a brief summary of your thesis and the scope of this essay.", "styles": {} }
+    ]
+  },
+  {
+    "type": "heading",
+    "props": { "level": 2 },
+    "content": [{ "type": "text", "text": "1. Introduction", "styles": {} }]
+  },
+  {
+    "type": "paragraph",
+    "content": [{ "type": "text", "text": "Establish the context of your research or argument. Clearly state your thesis statement at the end of this section.", "styles": {} }]
+  },
+  {
+    "type": "heading",
+    "props": { "level": 2 },
+    "content": [{ "type": "text", "text": "2. Historical Context / Theoretical Framework", "styles": {} }]
+  },
+  {
+    "type": "paragraph",
+    "content": [{ "type": "text", "text": "Discuss the background and existing literature related to your topic.", "styles": {} }]
+  },
+  {
+    "type": "heading",
+    "props": { "level": 2 },
+    "content": [{ "type": "text", "text": "3. Main Argument & Evidence", "styles": {} }]
+  },
+  {
+    "type": "paragraph",
+    "content": [{ "type": "text", "text": "Present your detailed analysis, supported by citations and references.", "styles": {} }]
+  },
+  {
+    "type": "heading",
+    "props": { "level": 2 },
+    "content": [{ "type": "text", "text": "4. Discussion & Implications", "styles": {} }]
+  },
+  {
+    "type": "heading",
+    "props": { "level": 2 },
+    "content": [{ "type": "text", "text": "5. Conclusion", "styles": {} }]
+  },
+  {
+    "type": "heading",
+    "props": { "level": 2 },
+    "content": [{ "type": "text", "text": "References", "styles": {} }]
+  },
+  {
+    "type": "bulletListItem",
+    "content": [{ "type": "text", "text": "Lastname, F. (Year). Title of the work. Publisher.", "styles": {} }]
+  }
+]

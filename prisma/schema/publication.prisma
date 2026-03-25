@@ -1,0 +1,35 @@
+enum PaperType {
+  ARTICLE
+  SHORT_STORY
+  LONG_ESSAY
+}
+
+enum PaperStatus {
+  DRAFT
+  PENDING_REVIEW     // User requested to publish
+  PUBLISHED          // Publicly visible
+  COMPETITION_ENTRY  // Submitted to competition
+  ARCHIVED
+}
+
+model Paper {
+  id              String      @id @default(uuid())
+  title           String
+  slug            String?     @unique       // SEO: "the-nature-of-consciousness-a1b2"
+  content         Json                      // BlockNote.js Content (Array of Blocks)
+  excerpt         String?
+  coverImageUrl   String?                   // Thumbnail / hero image
+  tags            String[]                  // Category tags
+  viewCount       Int         @default(0)   // Analytics data
+  type            PaperType
+  status          PaperStatus @default(DRAFT)
+  version         Int         @default(1)   // Futuristic: Content history versioning
+  
+  authorId        String
+  author          User        @relation(fields: [authorId], references: [id])
+  
+  competitionEntry CompetitionEntry?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}

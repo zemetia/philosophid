@@ -1,33 +1,143 @@
-
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
-import gsap from 'gsap';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
+
+const pageVariants = {
+  initial: { opacity: 0, x: 30, filter: "blur(10px)" },
+  animate: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
+  exit: { opacity: 0, x: -30, filter: "blur(10px)", transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } }
+};
+
+const InputField = ({ 
+  label, 
+  placeholder, 
+  field,
+  formData,
+  handleInputChange,
+  type = "text",
+  options = []
+}: { 
+  label: string, 
+  placeholder: string, 
+  field: string,
+  formData: any,
+  handleInputChange: (field: string, value: string) => void,
+  type?: string,
+  options?: string[]
+}) => {
+  const isFocusedOrFilled = formData[field] !== '';
+  
+  return (
+    <div className="relative w-full group">
+      <label 
+        className={`absolute left-0 transition-all duration-300 pointer-events-none font-ui uppercase tracking-[0.2em] font-bold ${
+          isFocusedOrFilled ? '-top-6 text-[10px] text-black/60' : 'top-4 text-xs text-black/40'
+        }`}
+      >
+        {label}
+      </label>
+      
+      {type === 'select' ? (
+        <select
+          id={field}
+          name={field}
+          value={formData[field]}
+          onChange={(e) => handleInputChange(field, e.target.value)}
+          className="w-full bg-transparent border-b-2 border-black/10 focus:border-black outline-none py-4 font-ui text-sm uppercase tracking-widest transition-colors cursor-pointer appearance-none"
+        >
+          <option value="" disabled hidden>{placeholder}</option>
+          {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+      ) : (
+        <input 
+          id={field}
+          name={field}
+          type={type} 
+          placeholder={placeholder}
+          value={formData[field]}
+          onChange={(e) => handleInputChange(field, e.target.value)}
+          className="w-full bg-transparent border-b-2 border-black/10 focus:border-black outline-none py-4 font-ui text-sm uppercase tracking-widest transition-colors placeholder:text-transparent focus:placeholder:text-black/20"
+        />
+      )}
+      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-focus-within:w-full"></div>
+    </div>
+  );
+};
 
 export default function RegistrationPage() {
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    birthday: '',
+    location: '',
+    institution: '',
+    major: '',
+    interests: '',
+    favoritePhilosopher: '',
+    phone: '',
+    instagram: '',
+    facebook: '',
+    linkedIn: '',
+    preferredLanguage: 'English',
+    philosophySchool: '',
+  });
+
+  const [agreed, setAgreed] = useState(false);
   const totalSteps = 4;
-  const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from('.wizard-step-reveal', {
-        opacity: 0,
-        x: 20,
-        duration: 0.8,
-        ease: 'power3.out',
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleNext = async () => {
+    if (step < totalSteps) {
+      setStep(step + 1);
+    } else {
+      if (!agreed) {
+        alert("Please agree to the Terms of Service.");
+        return;
+      }
+      await handleFinalize();
+    }
+  };
+
+  const handleFinalize = async () => {
+    setLoading(true);
+    try {
+      // Clean up empty fields so they don't override Firebase data with blanks
+      const cleanedData = Object.fromEntries(
+        Object.entries(formData).filter(([_, v]) => v && v.toString().trim() !== '')
+      );
+
+      const payload = {
+        ...cleanedData
+      };
+      
+      const response = await fetch('/api/auth/sync', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
       });
-    }, containerRef);
 
-    return () => ctx.revert();
-  }, [step]);
-
-  const handleNext = () => {
-    if (step < totalSteps) setStep(step + 1);
-    else {
-      // Complete
-      router.push('/');
+      if (response.ok) {
+        router.push('/dashboard');
+      } else {
+        const err = await response.json();
+        alert(err.error || "Failed to save profile. Please try again.");
+      }
+    } catch (error) {
+      console.error("Finalize error:", error);
+      alert("An unexpected error occurred during registration. Please check your network and try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,134 +145,165 @@ export default function RegistrationPage() {
     if (step > 1) setStep(step - 1);
   };
 
-  const InputField = ({ label, placeholder, type = "text" }: { label: string, placeholder: string, type?: string }) => (
-    <div className="space-y-4 group">
-      <label className="font-ui text-[9px] uppercase tracking-[0.5em] font-bold text-[#8E8E8E] group-focus-within:text-black transition-colors">
-        {label}
-      </label>
-      <input 
-        type={type} 
-        placeholder={placeholder}
-        className="w-full bg-transparent border-b-2 border-black/10 focus:border-black outline-none py-2 font-ui text-sm uppercase tracking-widest transition-all placeholder:opacity-10"
-      />
-    </div>
-  );
+
 
   return (
-    <section ref={containerRef} className="relative w-full min-h-screen bg-[#F4F2ED] flex flex-col overflow-hidden pt-16">
-      {/* Background Decor */}
-      <div className="absolute inset-0 grid-pattern opacity-40 z-0"></div>
+    <section className="relative w-full min-h-screen bg-[#F4F2ED] flex flex-col pt-24 pb-12 overflow-hidden selection:bg-[#4E6E81] selection:text-white">
+      {/* Background Ambience */}
+      <div className="absolute inset-x-0 top-0 h-[500px] bg-gradient-to-b from-[#E5E1D8] to-transparent opacity-60 z-0 pointer-events-none"></div>
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#4E6E81] rounded-full mix-blend-multiply filter blur-[120px] opacity-10 zoom-in animate-pulse-slow"></div>
       
-      {/* Progress Architecture */}
-      <div className="fixed top-0 left-0 w-full h-1 z-50 bg-black/5 mt-16">
-        <div 
-          className="h-full bg-[#4E6E81] transition-all duration-700 ease-in-out" 
-          style={{ width: `${(step / totalSteps) * 100}%` }}
-        ></div>
+      {/* Progress Line */}
+      <div className="fixed top-0 left-0 w-full h-1.5 z-50 bg-black/5">
+        <motion.div 
+          className="h-full bg-black" 
+          initial={{ width: 0 }}
+          animate={{ width: `${(step / totalSteps) * 100}%` }}
+          transition={{ duration: 0.8, ease: "anticipate" }}
+        />
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10">
-        <div className="max-w-4xl w-full">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10 w-full max-w-5xl mx-auto">
+        <div className="w-full flex flex-col md:flex-row gap-12 lg:gap-24">
           
-          <header className="mb-16 flex justify-between items-end border-b-2 border-black pb-8">
-            <div className="wizard-step-reveal">
-              <span className="font-ui text-[10px] uppercase tracking-[0.8em] text-[#4E6E81] font-bold block mb-4">Constitutional Registry</span>
-              <h2 className="font-ui text-5xl md:text-7xl font-bold uppercase tracking-tighter leading-none">
-                Step <span className="outline-text">0{step}</span>
-              </h2>
-            </div>
-            <div className="text-right font-ui text-[9px] uppercase tracking-widest text-[#8E8E8E] mb-2">
-               Phase {step} of {totalSteps}
-            </div>
-          </header>
+          {/* Left Column: Context */}
+          <div className="w-full md:w-5/12 flex flex-col pt-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <span className="font-ui text-[10px] uppercase tracking-[0.4em] text-black/50 font-bold mb-6 block">
+                Onboarding &bull; Phase 0{step}
+              </span>
+              <h1 className="font-serif italic text-4xl lg:text-5xl leading-tight text-[#2A2A2A] mb-8">
+                {step === 1 && "Start by sharing who you are."}
+                {step === 2 && "What fuels your intellect?"}
+                {step === 3 && "Where can the world find you?"}
+                {step === 4 && "Final touches for your persona."}
+              </h1>
+              <p className="font-ui text-sm leading-relaxed text-black/60 max-w-sm hidden md:block">
+                We collect this to tailor your dashboard experience and accurately portray your philosophical identity within the collective.
+              </p>
+            </motion.div>
+          </div>
 
-          <div className="bg-white brutalist-border shadow-[20px_20px_0px_0px_rgba(0,0,0,0.05)] p-12 md:p-20 wizard-step-reveal">
-            
-            {step === 1 && (
-              <div className="space-y-12">
-                <div className="mb-12">
-                  <h3 className="font-ui text-2xl uppercase font-bold tracking-widest mb-4">Personal Archetype</h3>
-                  <p className="font-serif italic text-lg opacity-60">Define the physical vessel of your dialectic presence.</p>
-                </div>
-                <div className="grid md:grid-cols-2 gap-12">
-                  <InputField label="Full Appellation" placeholder="NAME / IDENTITY" />
-                  <InputField label="Cycles Lived (Age)" placeholder="SOLAR CYCLES" type="number" />
-                  <InputField label="Temporal Origin (Birthday)" placeholder="YYYY / MM / DD" type="date" />
-                  <InputField label="Geopolitical Locus" placeholder="NATIONALITY" />
-                </div>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="space-y-12">
-                <div className="mb-12">
-                  <h3 className="font-ui text-2xl uppercase font-bold tracking-widest mb-4">Academic Standpoint</h3>
-                  <p className="font-serif italic text-lg opacity-60">Situate your thought within the institutional manifold.</p>
-                </div>
-                <div className="grid md:grid-cols-2 gap-12">
-                  <InputField label="Parent Institution" placeholder="ACADEMY / UNIVERSITY" />
-                  <InputField label="Primary Discipline" placeholder="MAJOR FIELD" />
-                  <InputField label="Focus Domain" placeholder="INTERESTING FIELD" />
-                  <InputField label="Favored Logos (Philosopher)" placeholder="ARCHETYPE MENTOR" />
-                </div>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div className="space-y-12">
-                <div className="mb-12">
-                  <h3 className="font-ui text-2xl uppercase font-bold tracking-widest mb-4">The Connected Mind</h3>
-                  <p className="font-serif italic text-lg opacity-60">Map your digital synapses across the manifold.</p>
-                </div>
-                <div className="grid md:grid-cols-2 gap-12">
-                  <InputField label="Vocal Signal (Phone)" placeholder="+00 000 0000" type="tel" />
-                  <InputField label="Instagram Node" placeholder="@IDENTITY" />
-                  <InputField label="Facebook Alias" placeholder="PROFILE LINK" />
-                  <InputField label="LinkedIn Professional" placeholder="CAREER TRACE" />
-                </div>
-              </div>
-            )}
-
-            {step === 4 && (
-              <div className="space-y-12">
-                <div className="mb-12">
-                  <h3 className="font-ui text-2xl uppercase font-bold tracking-widest mb-4">Final Affirmation</h3>
-                  <p className="font-serif italic text-lg opacity-60">Commit your data to the immutable archive of Reason.</p>
-                </div>
-                <div className="space-y-8">
-                  <InputField label="Written Code Preference" placeholder="ENGLISH / GREEK / LATIN" />
-                  <InputField label="Primary School of Thought" placeholder="EXISTENTIALISM / STOICISM / etc" />
-                  
-                  <div className="flex items-start gap-4 p-6 bg-black/5 border-l-4 border-[#4E6E81]">
-                    <input type="checkbox" className="mt-1 w-4 h-4 accent-[#4E6E81]" id="terms" />
-                    <label htmlFor="terms" className="font-ui text-[10px] uppercase tracking-widest leading-relaxed text-[#8E8E8E] cursor-pointer">
-                      I acknowledge that my inquiries will be subjected to the <span className="text-black font-bold">Logos Protocol</span> and that structural integrity is my primary responsibility within this collective.
-                    </label>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="mt-20 flex justify-between items-center border-t border-black/10 pt-12">
-              <button 
-                onClick={handleBack}
-                disabled={step === 1}
-                className={`font-ui text-[10px] uppercase tracking-[0.5em] font-bold py-4 px-8 border-2 border-black hover:bg-black hover:text-white transition-all ${step === 1 ? 'opacity-20 cursor-not-allowed' : ''}`}
-              >
-                Retrace
-              </button>
+          {/* Right Column: Interactive Wizard */}
+          <div className="w-full md:w-7/12 mt-8 md:mt-0">
+            <div className="bg-white p-10 lg:p-14 shadow-2xl relative overflow-hidden group">
+              {/* Subtle dynamic border */}
+              <div className="absolute inset-0 border-[0.5px] border-black/10 transition-colors group-hover:border-black/20 pointer-events-none"></div>
               
-              <button 
-                onClick={handleNext}
-                className="font-ui text-[10px] uppercase tracking-[0.5em] font-bold py-4 px-12 bg-black text-white hover:bg-[#4E6E81] transition-all brutalist-border"
-              >
-                {step === totalSteps ? 'Finalize Record' : 'Advance Phase'}
-              </button>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={step}
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="min-h-[420px]"
+                >
+                  {step === 1 && (
+                    <div className="space-y-12 pt-4">
+                      <InputField formData={formData} handleInputChange={handleInputChange} label="Preferred Moniker (Full Name)" placeholder="YOUR NAME" field="name" />
+                      <div className="grid grid-cols-1 gap-8">
+                        <InputField formData={formData} handleInputChange={handleInputChange} label="Birthday" placeholder="YYYY-MM-DD" type="date" field="birthday" />
+                      </div>
+                      <InputField formData={formData} handleInputChange={handleInputChange} label="Location (City, Country)" placeholder="CITY / COUNTRY" field="location" />
+                    </div>
+                  )}
+
+                  {step === 2 && (
+                    <div className="space-y-12 pt-4">
+                      <InputField formData={formData} handleInputChange={handleInputChange} label="Institution / Alma Mater" placeholder="UNIVERSITY OR SCHOOL" field="institution" />
+                      <InputField formData={formData} handleInputChange={handleInputChange} label="Major / Focus Area" placeholder="E.G. PHILOSOPHY, LITERATURE" field="major" />
+                      <InputField formData={formData} handleInputChange={handleInputChange} label="Primary Interests" placeholder="TOPICS YOU DEEPLY CARE ABOUT" field="interests" />
+                      <InputField formData={formData} handleInputChange={handleInputChange} label="Favorite Philosopher" placeholder="NAME OF YOUR INTELLECTUAL HERO" field="favoritePhilosopher" />
+                    </div>
+                  )}
+
+                  {step === 3 && (
+                    <div className="space-y-12 pt-4">
+                      <InputField formData={formData} handleInputChange={handleInputChange} label="Phone Number" placeholder="+62 000 0000" type="tel" field="phone" />
+                      <InputField formData={formData} handleInputChange={handleInputChange} label="Instagram Handle" placeholder="@YOURNAME" field="instagram" />
+                      <InputField formData={formData} handleInputChange={handleInputChange} label="Facebook Profile" placeholder="URL OR USERNAME" field="facebook" />
+                      <InputField formData={formData} handleInputChange={handleInputChange} label="LinkedIn URL" placeholder="URL" field="linkedIn" />
+                    </div>
+                  )}
+
+                  {step === 4 && (
+                    <div className="space-y-12 pt-4">
+                      <InputField 
+                        formData={formData} handleInputChange={handleInputChange}
+                        label="Preferred Language" 
+                        placeholder="SELECT LANGUAGE" 
+                        field="preferredLanguage" 
+                        type="select"
+                        options={['English', 'Indonesian']}
+                      />
+                      <InputField 
+                        formData={formData} handleInputChange={handleInputChange}
+                        label="Primary School of Thought" 
+                        placeholder="SELECT OR TYPE OR LEAVE BLANK"
+                        field="philosophySchool" 
+                      />
+                      
+                      <div className="pt-6">
+                        <label className="flex items-start gap-5 cursor-pointer group">
+                          <div className="relative mt-0.5">
+                            <input 
+                              type="checkbox" 
+                              className="peer sr-only" 
+                              checked={agreed}
+                              onChange={(e) => setAgreed(e.target.checked)} 
+                            />
+                            <div className="w-5 h-5 border-2 border-black/20 peer-checked:border-black peer-checked:bg-black transition-all flex items-center justify-center group-hover:border-black/50">
+                              <CheckCircle2 className={`w-3 h-3 text-white transition-opacity ${agreed ? 'opacity-100' : 'opacity-0'}`} />
+                            </div>
+                          </div>
+                          <span className="font-ui text-[11px] uppercase tracking-widest leading-relaxed text-black/60 group-hover:text-black/80 transition-colors mt-0.5">
+                            I agree to the <b className="text-black inline-block under-dash mx-1 cursor-pointer">Terms of Service</b> and acknowledge my data logic.
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Navigation Controls */}
+              <div className="mt-16 flex justify-between items-center relative z-20">
+                <button 
+                  onClick={handleBack}
+                  disabled={step === 1 || loading}
+                  className={`flex items-center gap-2 font-ui text-[10px] uppercase tracking-[0.2em] font-bold text-black/40 hover:text-black transition-colors ${step === 1 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                >
+                  <ArrowLeft size={14} className="mb-0.5" />
+                  Return
+                </button>
+                
+                <button 
+                  onClick={handleNext}
+                  disabled={loading}
+                  className="group flex items-center gap-3 font-ui text-[11px] uppercase tracking-[0.2em] font-bold py-4 px-8 bg-black text-white hover:bg-neutral-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden relative"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    {loading ? (
+                      <><Loader2 size={16} className="animate-spin mb-0.5" /> Processing</>
+                    ) : (
+                      <>{step === totalSteps ? 'Complete Registration' : 'Next Phase'} <ArrowRight size={14} className="mb-0.5 group-hover:translate-x-1 transition-transform" /></>
+                    )}
+                  </span>
+                  {/* Hover visual effect */}
+                  <div className="absolute inset-0 bg-[#2A2A2A] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+                </button>
+              </div>
+
             </div>
           </div>
+          
         </div>
       </div>
-
     </section>
   );
 }

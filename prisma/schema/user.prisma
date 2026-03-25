@@ -1,0 +1,90 @@
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+  MODERATOR
+  JUDGE
+  EDITOR
+}
+
+enum BadgeType {
+  AWARD
+  PARTICIPANT
+  MILESTONE
+}
+
+enum EngagementLevel {
+  NEW
+  ACTIVE
+  VETERAN
+}
+
+model User {
+  id              String           @id @default(uuid())
+  firebaseUid     String           @unique
+  email           String           @unique
+  username        String?          @unique       // Unique identifier for /{username}
+  name            String?
+  avatarUrl       String?
+  role            Role             @default(USER)
+  score           Int              @default(0)   // Total engagement points
+  reputationScore Int              @default(0)   // Community-vouched reputation
+  engagementLevel EngagementLevel @default(NEW)
+  
+  // Profile Details
+  bio             String?          @db.Text
+  birthday        DateTime?
+  location        String?
+  institution     String?
+  major           String?
+  interests       String?          // e.g. "ethics, metaphysics"
+  favoritePhilosopher String?
+  
+  // Contact & Social
+  phone           String?
+  instagram       String?
+  facebook        String?
+  linkedIn        String?
+  
+  // Preferences & Meta
+  preferredLanguage String?        @default("English")
+  philosophySchool  String?
+  onboardingCompleted Boolean      @default(false)
+  lastLogin       DateTime?
+  stats           Json?            // Aggregate analytics (likes, reads, etc.)
+  
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  // Relations
+  papers               Paper[]
+  transactions         Transaction[]
+  competitions         CompetitionEntry[]
+  badges               UserBadge[]
+  createdCompetitions  Competition[]
+  scoresGiven          Score[]          // Scores given as a judge
+}
+
+model Badge {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  description String
+  iconUrl     String?
+  type        BadgeType   @default(MILESTONE)
+  createdAt   DateTime    @default(now())
+  
+  users       UserBadge[]
+  rewardFor   Competition[] // Linking back to competitions that give this badge
+}
+
+model UserBadge {
+  id        String   @id @default(uuid())
+  userId    String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id])
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+
+  @@unique([userId, badgeId])
+}

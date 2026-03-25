@@ -37,10 +37,10 @@ export default function AboutPage() {
           <div className="md:col-span-8 reveal-about">
             <span className="font-ui text-[10px] uppercase tracking-[0.8em] text-[#4E6E81] font-bold block mb-6">Structural Identity</span>
             <h1 className="font-ui text-7xl md:text-[10rem] font-bold uppercase tracking-tighter leading-[0.8] mb-12">
-              Beyond the <br /> <span className="text-[#7A5C3E]">Noise</span>
+              About <br /> <span className="text-[#7A5C3E] outline-text text-8xl ">Philosophid</span>
             </h1>
-            <p className="font-serif text-3xl md:text-5xl leading-tight italic max-w-2xl opacity-80">
-              &quot;We are an architecture of inquiry, a structuralist response to the fragmentation of contemporary discourse.&quot;
+            <p className="font-serif text-2xl md:text-3xl leading-tight italic max-w-3xl opacity-80">
+              &quot;Philosophid is a digital platform and intellectual movement designed to foster philosophical literacy and structured critical thinking across all levels of society.&quot;
             </p>
           </div>
           <div className="md:col-span-4 flex flex-col justify-end items-end reveal-about">
@@ -57,7 +57,66 @@ export default function AboutPage() {
         </div>
       </header>
 
-      {/* 2. Editorial Philosophy */}
+      {/* 1.5 About Context */}
+      <section className="max-w-7xl mx-auto px-6 mb-32 reveal-about">
+        <div className="grid md:grid-cols-12 gap-12">
+           <div className="md:col-span-4">
+              <span className="font-ui text-[10px] uppercase tracking-[0.8em] text-[#4E6E81] font-bold block mb-6">The Platform</span>
+              <h2 className="font-ui text-3xl font-bold uppercase tracking-tighter leading-none">
+                Origin & <br/> Intent
+              </h2>
+           </div>
+           <div className="md:col-span-8 space-y-8 font-serif text-xl leading-relaxed opacity-80">
+              <p>
+                Philosophid is a digital platform and intellectual movement originating from Indonesia, designed to foster philosophical literacy and structured critical thinking across all levels of society—locally and globally. Recognizing philosophy as the foundation of all knowledge, Philosophid seeks to cultivate disciplined modes of thought that are clear, profound, and transformative.
+              </p>
+              <p>
+                Through educational initiatives and structured essay competitions, the platform provides a forum for the articulation of ideas, the refinement of perspectives, and the selection of outstanding contributions to public discourse. Beyond education, Philosophid positions itself as a movement: advancing the practice of critical reflection, encouraging ethical engagement, and contributing to the development of a culture of thoughtful and responsible citizenship.
+              </p>
+           </div>
+        </div>
+      </section>
+
+      {/* 2. Vision */}
+      <section className="max-w-7xl mx-auto px-6 mb-48 reveal-about">
+        <div className="border-l-4 border-black pl-8 md:pl-16 py-8">
+           <span className="font-ui text-[10px] uppercase tracking-[0.8em] text-[#4E6E81] font-bold block mb-6">Our Vision</span>
+           <h2 className="font-ui text-4xl md:text-6xl font-bold uppercase tracking-tighter leading-[0.9] text-black">
+             Intellectual <span className="text-[#7A5C3E]">Renewal</span>
+           </h2>
+           <p className="font-serif text-xl md:text-3xl mt-8 leading-relaxed opacity-80 max-w-4xl">
+             Philosophid envisions an intellectual renewal in Indonesia: a generation of critically minded youth whose sustained practice of reflective thought catalyzes scholarly growth, elevates public discourse, and contributes to national well-being.
+           </p>
+        </div>
+      </section>
+
+      {/* 3. Mission */}
+      <section className="max-w-7xl mx-auto px-6 mb-64 reveal-about">
+        <header className="mb-16 flex items-end justify-between border-b-2 border-black pb-8">
+           <h3 className="font-ui text-5xl md:text-8xl font-bold uppercase tracking-tighter leading-none">
+             Core <br/> Missions
+           </h3>
+           <span className="font-ui text-xl font-bold hidden md:block">(06 DIRECTIVES)</span>
+        </header>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-0 border-t border-l border-black bg-black">
+           {[
+             { title: "Movement", desc: "Create a nationwide movement that makes critical and philosophical thinking a respected and desirable trend in Indonesia." },
+             { title: "Future Gen", desc: "Equip future generations with the mindset and skills to think critically and question constructively." },
+             { title: "Open Dialogue", desc: "Provide open spaces for dialogue guided by strong moral principles and ethical responsibility." },
+             { title: "Platform", desc: "Offer platforms for individuals to showcase their ideas, talents, and intellectual contributions." },
+             { title: "Connection", desc: "Build bridges between diverse communities, fostering collaboration and mutual understanding through shared exploration of ideas." },
+             { title: "Accessibility", desc: "Make philosophy accessible and relevant to everyday life, turning deep thinking into a practical problem solving tool for personal and social growth." }
+           ].map((mission, idx) => (
+             <div key={idx} className="bg-[#F4F2ED] p-10 border-r border-b border-black hover:bg-black hover:text-white transition-colors duration-500 group flex flex-col justify-between h-full">
+                <span className="font-ui text-xs font-bold opacity-50 mb-6 block group-hover:text-[#4E6E81]">0{idx + 1} / {mission.title.toUpperCase()}</span>
+                <p className="font-serif text-lg leading-relaxed">{mission.desc}</p>
+             </div>
+           ))}
+        </div>
+      </section>
+
+      {/* 4. Editorial Philosophy */}
       <section className="max-w-7xl mx-auto px-6 mb-64 grid md:grid-cols-12 gap-24 items-start">
         <div className="md:col-span-5 reveal-about sticky top-32">
           <h3 className="font-ui text-xs uppercase tracking-[0.5em] font-bold text-[#8E8E8E] mb-8">Editorial Philosophy</h3>
@@ -88,7 +147,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 3. The "Not" Section - Brutalist Table */}
+      {/* 5. The "Not" Section - Brutalist Table */}
       <section className="bg-black text-white py-48 mb-64 overflow-hidden relative">
         <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
           <span className="font-ui text-[20rem] font-bold uppercase tracking-tighter leading-none">Anti</span>
@@ -132,7 +191,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 4. Ethics & Independence */}
+      {/* 6. Ethics & Independence */}
       <section className="max-w-5xl mx-auto px-6 mb-64 reveal-about">
         <div className="text-center mb-24">
            <span className="font-ui text-[10px] uppercase tracking-[1em] text-[#7A5C3E] font-bold block mb-8">Independence Protocol</span>
@@ -150,7 +209,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 5. Contact / Inquiries */}
+      {/* 7. Contact / Inquiries */}
       <section className="max-w-7xl mx-auto px-6">
         <div className="bg-white brutalist-border p-12 md:p-32 flex flex-col md:flex-row gap-24 items-center reveal-about shadow-[30px_30px_0px_0px_rgba(78,110,129,0.1)]">
            <div className="flex-1">

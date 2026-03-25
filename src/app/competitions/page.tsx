@@ -1,13 +1,18 @@
-
 "use client";
+
 import React, { useEffect, useRef } from 'react';
-import { COMPETITION_TYPES, CURRENT_COMPETITION } from '../../lib/constants';
+import { useCompetitions } from '@/hooks/useCompetitions';
+import { Heading, MetaText, SectionTitle } from '@/components/atoms/Typography';
+import Link from 'next/link';
 import gsap from 'gsap';
 
 export default function CompetitionsPage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { data: competitionsData, isLoading } = useCompetitions({ active: true });
 
   useEffect(() => {
+    if (isLoading) return;
+    
     const ctx = gsap.context(() => {
       gsap.from('.reveal-item', {
         opacity: 0,
@@ -17,65 +22,79 @@ export default function CompetitionsPage() {
         ease: 'power3.out'
       });
     }, containerRef);
-    
-    // window.scrollTo(0, 0); // Next.js handles scroll, but useEffect runs after mount
     return () => ctx.revert();
-  }, []);
+  }, [competitionsData, isLoading]);
+
+  const activeCompetition = competitionsData?.data?.[0]; // Main featured one
 
   return (
     <div ref={containerRef} className="pt-32 pb-64 bg-[#F4F2ED] selection:bg-[#4E6E81] selection:text-white overflow-hidden">
-      {/* 1. Header & Brief */}
+      {/* 1. Header & Brief (Featured) */}
       <header className="max-w-7xl mx-auto px-6 mb-32">
         <div className="grid md:grid-cols-12 gap-12 border-b-4 border-black pb-24">
           <div className="md:col-span-8 reveal-item">
             <span className="font-ui text-[10px] uppercase tracking-[0.6em] text-[#4E6E81] font-bold block mb-6">Open Inquiry</span>
-            <h1 className="font-ui text-7xl md:text-[9rem] font-bold uppercase tracking-tighter leading-[0.8] mb-12">
-              Arena of <br /> <span className="text-[#7A5C3E]">Logos</span>
-            </h1>
-            <p className="font-serif text-3xl md:text-4xl leading-snug italic max-w-2xl opacity-80">
-              &quot;{CURRENT_COMPETITION.description}&quot;
-            </p>
+            {activeCompetition ? (
+              <>
+                <h1 className="font-ui text-7xl md:text-[9rem] font-bold uppercase tracking-tighter leading-[0.8] mb-12">
+                  {activeCompetition.title.split(' ')[0]} <br /> <span className="text-[#7A5C3E]">{activeCompetition.title.split(' ').slice(1).join(' ')}</span>
+                </h1>
+                <p className="font-serif text-3xl md:text-4xl leading-snug italic max-w-2xl opacity-80">
+                  &quot;{activeCompetition.description}&quot;
+                </p>
+              </>
+            ) : (
+              <h1 className="font-ui text-7xl md:text-[8rem] font-bold uppercase tracking-tighter leading-[0.8] mb-12">
+                Arena of <br /> <span className="text-[#7A5C3E]">Logos</span>
+              </h1>
+            )}
           </div>
           <div className="md:col-span-4 flex flex-col justify-end items-end reveal-item">
-            <div className="text-right space-y-4">
-              <div className="brutalist-border p-6 bg-black text-white inline-block">
-                <span className="font-ui text-xs uppercase tracking-widest block font-bold">Reward</span>
-                <span className="font-ui text-3xl font-bold uppercase tracking-tight">{CURRENT_COMPETITION.prize}</span>
+            {activeCompetition && (
+              <div className="text-right space-y-4">
+                <div className="brutalist-border p-6 bg-black text-white inline-block">
+                  <span className="font-ui text-xs uppercase tracking-widest block font-bold">Reward Pool</span>
+                  <span className="font-ui text-3xl font-bold uppercase tracking-tight">IDR {activeCompetition.prizes || "Variable"}</span>
+                </div>
+                <div className="font-ui text-[10px] uppercase tracking-widest text-[#8E8E8E]">
+                  Deadline: <span className="text-black font-bold">{new Date(activeCompetition.endDate).toLocaleDateString()}</span>
+                </div>
+                <Link 
+                  href={`/competitions/${activeCompetition.id}`}
+                  className="block mt-8 bg-[#7A5C3E] text-white px-8 py-4 font-ui text-[10px] uppercase tracking-widest font-bold text-center"
+                >
+                  Enter the Arena
+                </Link>
               </div>
-              <div className="font-ui text-[10px] uppercase tracking-widest text-[#8E8E8E]">
-                Deadline: <span className="text-black font-bold">{CURRENT_COMPETITION.deadline}</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </header>
 
-      {/* 2. Brutalist Timeline of Competition Types */}
+      {/* 2. List of All Active Competitions */}
       <section className="mb-48 relative">
         <div className="max-w-7xl mx-auto px-6">
-          <h3 className="font-ui text-[10px] uppercase tracking-[0.5em] text-[#8E8E8E] mb-16 font-bold">Chronology of Inquiry</h3>
-          
-          <div className="relative border-l-4 border-black ml-4 md:ml-0 md:border-l-0">
-             {/* Horizontal line for desktop */}
-             <div className="hidden md:block absolute top-0 left-0 w-full h-1 bg-black"></div>
-
-             <div className="grid md:grid-cols-3 gap-12 md:gap-0">
-               {COMPETITION_TYPES.map((type, idx) => (
-                 <div key={type.id} className="reveal-item relative pt-12 md:px-8 group">
-                   {/* Node marker */}
-                   <div className="absolute top-0 left-[-10px] md:left-8 w-4 h-4 bg-black rounded-full md:top-[-6px]"></div>
-                   
-                   <div className="p-8 brutalist-border bg-white group-hover:bg-[#121212] group-hover:text-white transition-all duration-500 shadow-[10px_10px_0px_0px_rgba(0,0,0,0.1)] group-hover:shadow-[10px_10px_0px_0px_#4E6E81]">
-                     <span className="font-ui text-xs uppercase tracking-widest font-bold text-[#4E6E81] block mb-4">{type.frequency}</span>
-                     <h4 className="font-ui text-3xl font-bold uppercase tracking-tighter mb-4">{type.title}</h4>
-                     <p className="font-serif text-lg opacity-70 leading-relaxed mb-6">{type.description}</p>
-                     <div className="font-ui text-[9px] uppercase tracking-[0.3em] opacity-40 group-hover:opacity-100 group-hover:text-[#4E6E81] transition-opacity">
-                        Framework: {type.id}
-                     </div>
+          <SectionTitle>Chronology of Inquiry</SectionTitle>
+          <div className="grid md:grid-cols-3 gap-8 mt-16">
+            {isLoading ? (
+               [1,2,3].map(i => <div key={i} className="h-64 bg-black/5 animate-pulse brutalist-border"></div>)
+            ) : (
+              competitionsData?.data?.map((comp: any) => (
+                <Link key={comp.id} href={`/competitions/${comp.id}`} className="reveal-item group">
+                   <div className="p-8 brutalist-border bg-white group-hover:bg-[#121212] group-hover:text-white transition-all duration-500 shadow-[10px_10px_0px_0px_rgba(0,0,0,0.1)] group-hover:shadow-[10px_10px_0px_10px_#4E6E81]">
+                      <div className="flex justify-between items-start mb-6">
+                        <span className="font-ui text-xs uppercase tracking-widest font-bold text-[#4E6E81]">{comp.type}</span>
+                        {comp.fee > 0 && <span className="bg-black text-[8px] text-white px-2 py-1 font-bold">PAID ENTRY</span>}
+                      </div>
+                      <h4 className="font-ui text-3xl font-bold uppercase tracking-tighter mb-4">{comp.title}</h4>
+                      <div className="flex justify-between items-center mt-12 opacity-40 group-hover:opacity-100 transition-opacity">
+                         <MetaText className="text-[8px]">{comp._count.entries} Participants</MetaText>
+                         <MetaText className="text-[8px]">Ends {new Date(comp.endDate).getMonth() + 1}/{new Date(comp.endDate).getFullYear()}</MetaText>
+                      </div>
                    </div>
-                 </div>
-               ))}
-             </div>
+                </Link>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -182,7 +201,14 @@ export default function CompetitionsPage() {
           </div>
         </div>
 
-        <button className="mt-32 px-16 py-8 bg-black text-white font-ui text-xs uppercase tracking-[0.5em] font-bold hover:bg-[#4E6E81] transition-all brutalist-border">
+        <button 
+           onClick={() => {
+              if (activeCompetition) {
+                window.location.href = `/competitions/${activeCompetition.id}`;
+              }
+           }} 
+           className="mt-32 px-16 py-8 bg-black text-white font-ui text-xs uppercase tracking-[0.5em] font-bold hover:bg-[#4E6E81] transition-all brutalist-border"
+        >
           Initiate Submission
         </button>
         <p className="mt-8 font-ui text-[9px] uppercase tracking-widest text-[#8E8E8E]">

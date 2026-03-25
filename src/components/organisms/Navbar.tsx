@@ -5,6 +5,8 @@ import { Logo } from '../atoms/Logo';
 import { Button } from '../atoms/Button';
 import { NavLink } from '../molecules/NavLink';
 import { SearchTrigger } from '../molecules/SearchTrigger';
+import Image from 'next/image';
+import Link from 'next/link';
 
 interface NavbarProps {
   onSearchClick: () => void;
@@ -13,6 +15,21 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onSearchClick }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [user, setUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(res => res.ok ? res.json() : { user: null })
+      .then(data => {
+        if (data.user) setUser(data.user);
+        setAuthLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch user auth state", err);
+        setAuthLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
     const controlNavbar = () => {
@@ -39,7 +56,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onSearchClick }) => {
           <NavLink href="/hall-of-fame">Fame</NavLink>
           <NavLink href="/about">About</NavLink>
           <SearchTrigger onClick={onSearchClick} />
-          <Button href="/login" size="sm" variant="primary">Registry</Button>
+          {authLoading ? (
+            <div className="w-8 h-8 rounded-full bg-black/10 animate-pulse border border-black/5"></div>
+          ) : user ? (
+            <Link href="/dashboard" className="relative w-8 h-8 rounded-full overflow-hidden border border-black/20 hover:border-black/60 transition-colors bg-[#E5E1D8]">
+              {user.picture ? (
+                <Image src={user.picture} alt="Avatar" fill className="object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center font-serif text-black/40 text-xs uppercase">{user.name?.charAt(0) || user.email?.charAt(0) || '?'}</div>
+              )}
+            </Link>
+          ) : (
+            <Button href="/login" size="sm" variant="primary">Registry</Button>
+          )}
         </div>
       </div>
     </nav>

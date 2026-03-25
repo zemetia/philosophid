@@ -4,6 +4,8 @@ import React, { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { auth, googleProvider, signOut } from '@/lib/firebase';
+import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 
 export default function LoginPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,9 +32,87 @@ export default function LoginPage() {
     return () => ctx.revert();
   }, []);
 
-  const handleLogin = (e?: React.FormEvent) => {
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const handleSyncUser = async (user: any) => {
+    try {
+      const idToken = await user.getIdToken();
+      const response = await fetch('/api/auth/sync', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName,
+          picture: user.photoURL
+        })
+      });
+      
+      const data = await response.json();
+      
+      return data;
+    } catch (err) {
+      console.error("Sync error:", err);
+      return null;
+    }
+  };
+
+  const handleLogin = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    router.push('/register');
+    setLoading(true);
+    setError(null);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const dbUser = await handleSyncUser(userCredential.user);
+      
+      if (!dbUser) {
+        throw new Error("Synchronous identity verification failed. Please try again.");
+      }
+
+      // If user profile is incomplete, send to wizard
+      if (!dbUser.location) {
+        router.push('/register');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to sign in");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Sign out first to force the Google account picker to always appear
+      await signOut(auth);
+      const result = await signInWithPopup(auth, googleProvider);
+      const dbUser = await handleSyncUser(result.user);
+      
+      if (!dbUser) {
+        throw new Error("Synchronous identity verification failed. Please try again.");
+      }
+      
+      // If user profile is incomplete (new user via Google), send to wizard
+      if (!dbUser.location) {
+        router.push('/register');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to sign in with Google");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,13 +129,13 @@ export default function LoginPage() {
         <div className="flex-1 p-12 md:p-24 flex flex-col justify-between relative z-10">
           <div>
             <div className="reveal-element mb-12">
-              <h2 className="text-[10px] uppercase font-bold tracking-[0.8em] mb-4 text-[#4E6E81]">Authorization</h2>
+              <h2 className="text-[10px] uppercase font-bold tracking-[0.8em] mb-4 text-[#4E6E81]">Welcome Back</h2>
               <div className="w-16 h-[2px] bg-black"></div>
             </div>
             
             <h1 className="text-huge font-bold uppercase tracking-tighter text-black flex flex-col pointer-events-none mb-12">
-              <span className="reveal-element">Access</span>
-              <span className="reveal-element -mt-[0.2em] outline-text opacity-50">Logos</span>
+              <span className="reveal-element">Sign</span>
+              <span className="reveal-element -mt-[0.2em] outline-text opacity-50">In</span>
             </h1>
           </div>
 
@@ -79,51 +159,59 @@ export default function LoginPage() {
         {/* Right: The Form - Brutalist & Rigid */}
         <div className="w-full md:w-[450px] bg-white border-l-2 border-black p-12 md:p-20 flex flex-col justify-center relative z-20">
           <header className="mb-20 reveal-element">
-            <h3 className="font-ui text-xs uppercase tracking-[0.6em] font-bold text-[#8E8E8E] mb-2">Registry Credentials</h3>
+            <h3 className="font-ui text-xs uppercase tracking-[0.6em] font-bold text-[#8E8E8E] mb-2">Account Credentials</h3>
             <div className="w-full h-[1px] bg-black/10"></div>
           </header>
 
           <form className="space-y-12" onSubmit={handleLogin}>
             <div className="space-y-4 group reveal-element">
               <label className="font-ui text-[9px] uppercase tracking-[0.5em] font-bold text-[#8E8E8E] group-focus-within:text-black transition-colors">
-                Identifier
+                Email Address
               </label>
               <input 
                 type="email" 
-                placeholder="USER@LOGOS.ARCHIVE"
+                placeholder="YOUR-EMAIL@DOMAIN.COM"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-transparent border-b-2 border-black/10 focus:border-black outline-none py-2 font-ui text-sm uppercase tracking-widest transition-all placeholder:opacity-10"
               />
             </div>
 
             <div className="space-y-4 group reveal-element">
               <label className="font-ui text-[9px] uppercase tracking-[0.5em] font-bold text-[#8E8E8E] group-focus-within:text-black transition-colors">
-                Secure Key
+                Password
               </label>
               <input 
                 type="password" 
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-transparent border-b-2 border-black/10 focus:border-black outline-none py-2 font-ui text-sm transition-all placeholder:opacity-10"
               />
             </div>
 
+            {error && <p className="text-red-500 text-[10px] uppercase font-bold tracking-widest">{error}</p>}
+
             <div className="pt-8 space-y-6 reveal-element">
               <button 
                 type="submit"
+                disabled={loading}
                 className="w-full bg-black text-white py-6 font-ui text-[10px] uppercase tracking-[0.5em] font-bold hover:bg-[#4E6E81] transition-all brutalist-border relative group overflow-hidden"
               >
-                <span className="relative z-10">Execute Authorization</span>
+                <span className="relative z-10">Sign In</span>
                 <div className="absolute inset-0 bg-[#4E6E81] translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
               </button>
               
               <div className="relative flex items-center py-4">
                 <div className="flex-grow border-t border-black/10"></div>
-                <span className="flex-shrink mx-4 font-ui text-[8px] uppercase tracking-widest text-[#8E8E8E]">Sync Node</span>
+                <span className="flex-shrink mx-4 font-ui text-[8px] uppercase tracking-widest text-[#8E8E8E]">Social Authentication</span>
                 <div className="flex-grow border-t border-black/10"></div>
               </div>
 
               <button 
                 type="button"
-                onClick={() => handleLogin()}
+                onClick={() => handleGoogleLogin()}
+                disabled={loading}
                 className="w-full bg-white text-black py-6 font-ui text-[10px] uppercase tracking-[0.5em] font-bold hover:bg-black hover:text-white transition-all brutalist-border flex items-center justify-center gap-4"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -132,15 +220,15 @@ export default function LoginPage() {
                   <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
                   <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                Identity Sync
+                Continue with Google
               </button>
             </div>
           </form>
 
           <footer className="mt-24 reveal-element flex flex-col gap-4">
             <div className="flex justify-between items-center font-ui text-[9px] uppercase tracking-widest text-[#8E8E8E]">
-               <button type="button" className="hover:text-black transition-colors underline underline-offset-4 decoration-[#7A5C3E]">Recovery Protocol</button>
-               <button type="button" className="hover:text-black transition-colors">Request Account</button>
+               <button type="button" className="hover:text-black transition-colors underline underline-offset-4 decoration-[#7A5C3E]">Forgot Password?</button>
+               <button type="button" onClick={() => router.push('/register')} className="hover:text-black transition-colors">Create Account</button>
             </div>
           </footer>
         </div>

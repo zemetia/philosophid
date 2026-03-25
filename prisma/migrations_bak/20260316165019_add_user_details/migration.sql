@@ -1,0 +1,15 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "age" INTEGER,
+ADD COLUMN     "bio" TEXT,
+ADD COLUMN     "birthday" TIMESTAMP(3),
+ADD COLUMN     "facebook" TEXT,
+ADD COLUMN     "favoritePhilosopher" TEXT,
+ADD COLUMN     "instagram" TEXT,
+ADD COLUMN     "institution" TEXT,
+ADD COLUMN     "interests" TEXT,
+ADD COLUMN     "linkedIn" TEXT,
+ADD COLUMN     "location" TEXT,
+ADD COLUMN     "major" TEXT,
+ADD COLUMN     "philosophySchool" TEXT,
+ADD COLUMN     "phone" TEXT,
+ADD COLUMN     "preferredLanguage" TEXT DEFAULT 'English';

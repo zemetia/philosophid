@@ -1,0 +1,73 @@
+model Competition {
+  id              String      @id @default(uuid())
+  title           String
+  description     String
+  type            PaperType   @default(ARTICLE) // Exactly one PaperType allowed per contest
+  fee             Decimal                       // handled as high-precision decimal
+  startDate       DateTime
+  endDate         DateTime
+  isActive        Boolean     @default(true)
+  
+  // Customization
+  topics          String[]    // Main categorization topics
+  tags            String[]    // Key search terms
+  coverImageUrl   String?                       // Competition banner image
+  maxEntries      Int?                          // Optional entry cap (null = unlimited)
+  prizes          Json?                         // Prize pool definition
+  
+  // Relations
+  creatorId       String?                       // MODERATOR/EDITOR/ADMIN creator
+  creator         User?       @relation(fields: [creatorId], references: [id])
+  rewardBadgeId   String?                       // Prize badge associated with this competition
+  rewardBadge     Badge?      @relation(fields: [rewardBadgeId], references: [id])
+  
+  entries         CompetitionEntry[]
+  scoringConfig   CompetitionScoringConfig?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model CompetitionEntry {
+  id            String   @id @default(uuid())
+  competitionId String
+  userId        String
+  paperId       String   @unique
+  transactionId String?  @unique
+  status        String   @default("SUBMITTED") // SUBMITTED | WINNER | DISQUALIFIED
+  
+  competition   Competition  @relation(fields: [competitionId], references: [id])
+  user          User         @relation(fields: [userId], references: [id])
+  paper         Paper        @relation(fields: [paperId], references: [id])
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+  
+  scores        Score[]      // Granular judging scores
+  
+  submittedAt   DateTime @default(now())
+}
+
+model CompetitionScoringConfig {
+  id              String      @id @default(uuid())
+  competitionId   String      @unique
+  weightJudges    Float       @default(1.0) // Weights for judging scoring
+  weightCommunity Float       @default(0.0) // Potential future community voting weight
+  minScoresRequired Int       @default(3)   // Minimum judge scores to be valid
+
+  competition     Competition @relation(fields: [competitionId], references: [id])
+}
+
+model Score {
+  id            String   @id @default(uuid())
+  judgeId       String
+  entryId       String
+  value         Float             // Score given by judge
+  comment       String?  @db.Text // Judge feedback
+  
+  judge         User     @relation(fields: [judgeId], references: [id])
+  entry         CompetitionEntry @relation(fields: [entryId], references: [id])
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@unique([judgeId, entryId]) // Ensure a judge can only score an entry once
+}

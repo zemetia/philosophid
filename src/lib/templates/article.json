@@ -1,0 +1,29 @@
+[
+  {
+    "type": "heading",
+    "props": { "level": 1 },
+    "content": [{ "type": "text", "text": "Main Title of Your Article", "styles": {} }]
+  },
+  {
+    "type": "paragraph",
+    "content": [{ "type": "text", "text": "Write a compelling introduction here. Hook your readers with an interesting fact or a question.", "styles": { "italic": true } }]
+  },
+  {
+    "type": "heading",
+    "props": { "level": 2 },
+    "content": [{ "type": "text", "text": "The Core Argument", "styles": {} }]
+  },
+  {
+    "type": "paragraph",
+    "content": [{ "type": "text", "text": "Support your article with data, examples, or personal insights. Break down complex ideas into manageable sections.", "styles": {} }]
+  },
+  {
+    "type": "heading",
+    "props": { "level": 2 },
+    "content": [{ "type": "text", "text": "Conclusion", "styles": {} }]
+  },
+  {
+    "type": "paragraph",
+    "content": [{ "type": "text", "text": "Summarize your main points and provide a final thought or a call to action for your readers.", "styles": {} }]
+  }
+]

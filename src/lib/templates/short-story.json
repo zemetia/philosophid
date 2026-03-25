@@ -1,0 +1,23 @@
+[
+  {
+    "type": "heading",
+    "props": { "level": 1 },
+    "content": [{ "type": "text", "text": "Title of Your Short Story", "styles": {} }]
+  },
+  {
+    "type": "paragraph",
+    "content": [{ "type": "text", "text": "The setting was dark, and the air smelled like...", "styles": { "italic": true } }]
+  },
+  {
+    "type": "paragraph",
+    "content": [{ "type": "text", "text": "Introduce your protagonist here. Show, don't tell. Start with an action or a revealing piece of dialogue.", "styles": {} }]
+  },
+  {
+    "type": "paragraph",
+    "content": [{ "type": "text", "text": "\"I never thought I'd see you here,\" they said, their voice trembling slightly.", "styles": {} }]
+  },
+  {
+    "type": "paragraph",
+    "content": [{ "type": "text", "text": "Develop the conflict. What is at stake? What does the character want?", "styles": {} }]
+  }
+]

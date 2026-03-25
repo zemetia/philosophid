@@ -1,0 +1,43 @@
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+  EXPIRED
+}
+
+enum TransactionType {
+  ENTRY_FEE
+  PRIZE_PAYOUT
+  SUBSCRIPTION
+}
+
+model Transaction {
+  id                 String            @id @default(uuid())
+  userId             String
+  amount             Decimal
+  status             TransactionStatus @default(PENDING)
+  type               TransactionType   @default(ENTRY_FEE)
+  paymentGatewayRef  String?           // e.g. Midtrans Order ID or Snap Token
+  paymentMethod      String?
+  paymentUrl         String?
+  
+  metadata           Json?             // Flexible metadata
+  logs               TransactionLog[]
+  
+  user               User              @relation(fields: [userId], references: [id])
+  competitionEntry   CompetitionEntry? // 1:1 link to entry it pays for
+  
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+model TransactionLog {
+  id            String   @id @default(uuid())
+  transactionId String
+  status        String   // e.g. "WEBHOOK_RECEIVED"
+  payload       Json?    // Raw gateway Response
+  timestamp     DateTime @default(now())
+  
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+}
