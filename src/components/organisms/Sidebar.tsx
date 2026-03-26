@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { auth, signOut } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import { Logo } from "../atoms/Logo";
 import { MetaText } from "../atoms/Typography";
 import clsx from "clsx";
@@ -29,6 +30,7 @@ export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [userProfile, setUserProfile] = useState<{ username?: string } | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -54,6 +56,32 @@ export const Sidebar: React.FC = () => {
     setIsCollapsed(newState);
     localStorage.setItem("sidebar-collapsed", String(newState));
   };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const response = await fetch("/api/user/profile");
+          if (response.ok) {
+            const result = await response.json();
+            setUserProfile(result.data.user);
+          }
+        } catch (error) {
+          console.error("Failed to fetch user profile for sidebar:", error);
+        }
+      } else {
+        setUserProfile(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const items = NAV_ITEMS.map(item => {
+    if (item.label === "Profile" && userProfile?.username) {
+      return { ...item, href: `/${userProfile.username}` };
+    }
+    return item;
+  });
 
   return (
     <motion.aside
@@ -82,7 +110,7 @@ export const Sidebar: React.FC = () => {
       </div>
 
       <nav className="flex flex-col gap-6">
-        {NAV_ITEMS.map((item) => {
+        {items.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 

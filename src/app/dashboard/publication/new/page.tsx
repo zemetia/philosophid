@@ -9,6 +9,8 @@ import { ArrowLeft, Save, Share2 } from "lucide-react";
 import PublicationTypeSelector from "../../../../components/organisms/PublicationTypeSelector";
 import { PUBLICATION_TEMPLATES, PublicationType } from "../../../../lib/publication-templates";
 
+
+
 // Dynamically import the editor to disable SSR
 const BlockEditor = dynamic(
   () => import("../../../../components/organisms/BlockEditor"),
@@ -24,7 +26,7 @@ export default function NewPublicationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const { firebaseUid, user } = useAuth();
+  const { user } = useAuth();
   
   const typeParam = searchParams.get("type") as PublicationType;
   const [content, setContent] = useState<any>(null);
@@ -65,7 +67,7 @@ export default function NewPublicationPage() {
 
   // AUTO-SAVE LOGIC
   useEffect(() => {
-    if (!content || !showEditor || !firebaseUid) return;
+    if (!content || !showEditor || !user) return;
 
     const saveDraft = async () => {
       // Don't save if content is basically the initial template and user hasn't touched it 
@@ -91,7 +93,6 @@ export default function NewPublicationPage() {
           method,
           headers: {
             "Content-Type": "application/json",
-            "x-firebase-uid": firebaseUid,
           },
           body: JSON.stringify(payload),
         });
@@ -113,7 +114,7 @@ export default function NewPublicationPage() {
 
     const timeout = setTimeout(saveDraft, 2000); // 2 second debounce
     return () => clearTimeout(timeout);
-  }, [content, firebaseUid, paperId, showEditor, typeParam]);
+  }, [content, user, paperId, showEditor, typeParam]);
 
   const handleSelectType = (type: PublicationType) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -184,6 +185,7 @@ export default function NewPublicationPage() {
             <div className="w-full prose prose-lg prose-headings:font-serif prose-p:font-serif focus:outline-none">
               <BlockEditor 
                 key={typeParam} 
+                paperId={paperId}
                 onChange={setContent} 
                 initialContent={initialContent} 
                 variant="minimal" 

@@ -30,15 +30,12 @@ export const usePapers = (filters: PaperFilters = {}) => {
 };
 
 export const usePaper = (idOrSlug: string) => {
-  const { firebaseUid } = useAuth();
+  const { user } = useAuth();
   
   return useQuery({
     queryKey: ["paper", idOrSlug],
     queryFn: async () => {
-      const headers: HeadersInit = {};
-      if (firebaseUid) headers["x-firebase-uid"] = firebaseUid;
-
-      const res = await fetch(`/api/papers/${idOrSlug}`, { headers });
+      const res = await fetch(`/api/papers/${idOrSlug}`);
       if (!res.ok) throw new Error("Failed to fetch paper");
       return res.json();
     },
@@ -47,22 +44,18 @@ export const usePaper = (idOrSlug: string) => {
 };
 
 export const useMyPapers = (status?: string) => {
-  const { firebaseUid } = useAuth();
+  const { user, loading } = useAuth();
 
   return useQuery({
-    queryKey: ["my-papers", firebaseUid, status],
+    queryKey: ["my-papers", status],
     queryFn: async () => {
-      if (!firebaseUid) throw new Error("Unauthorized");
-      
       const params = new URLSearchParams();
       if (status) params.append("status", status);
 
-      const res = await fetch(`/api/papers/my?${params.toString()}`, {
-        headers: { "x-firebase-uid": firebaseUid },
-      });
+      const res = await fetch(`/api/papers/my?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch your papers");
       return res.json();
     },
-    enabled: !!firebaseUid,
+    enabled: !loading && !!user,
   });
 };

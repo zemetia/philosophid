@@ -1,0 +1,30 @@
+
+> philosophid-web@0.1.0 build
+> next build
+
+??? Next.js 16.1.4 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+??? Compiled successfully in 9.3s
+  Running TypeScript ...
+node.exe : Failed to compile.
+At C:\Users\WIN-11\AppData\Roaming\npm\npm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/npm/bin/npm-cli.js" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Failed to compile.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+./src/components/organisms/ReferenceManager.tsx:243:66
+Type error: Type 'ReferenceSourceType' is not assignable to type '"WEBSITE"'.
+  Type '"BOOK"' is not assignable to type '"WEBSITE"'.
+
+[0m [90m 241 |[39m                         className[33m=[39m[32m"w-full bg-white border-2 border-black p-3 font-ui text-sm focus:bg-stone-50 transition-colors outline-none cursor-pointer"[39m
+ [90m 242 |[39m                         value[33m=[39m{formData[33m.[39mtype}
+[31m[1m>[22m[39m[90m 243 |[39m                         onChange[33m=[39m{e [33m=>[39m setFormData({[33m...[39mformData[33m,[39m type[33m:[39m e[33m.[39mtarget[33m.[39mvalue [36mas[39m [33mReferenceSourceType[39m})}
+ [90m     |[39m                                                                  [31m[1m^[22m[39m
+ [90m 244 |[39m                       [33m>[39m
+ [90m 245 |[39m                         {[33mObject[39m[33m.[39mvalues([33mReferenceSourceType[39m)[33m.[39mmap((t) [33m=>[39m (
+ [90m 246 |[39m                           [33m<[39m[33moption[39m key[33m=[39m{t [36mas[39m string} value[33m=[39m{t [36mas[39m string}[33m>[39m[0m
+Next.js build worker exited with code: 1 and signal: null

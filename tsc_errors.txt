@@ -1,0 +1,18 @@
+﻿.next/dev/types/validator.ts(252,31): error TS2344: Type 'typeof import("D:/Kerja/Philosophid/Website/src/app/api/competitions/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/competitions/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(req: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ data: { entries: ({ user: { name: string; avatarUrl: string; }; } & { ...; })[]; _count: { ...; }; } & { ...; }; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(252,31): error TS2344: Type 'typeof import("D:/Kerja/Philosophid/Website/src/app/api/competitions/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/competitions/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(req: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ data: { entries: ({ user: { name: string; avatarUrl: string; }; } & { ...; })[]; _count: { ...; }; } & { ...; }; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+src/components/organisms/ReferenceManager.tsx(243,66): error TS2322: Type 'ReferenceSourceType' is not assignable to type '"WEBSITE"'.
+  Type '"BOOK"' is not assignable to type '"WEBSITE"'.
+src/lib/services/paper-service.ts(222,22): error TS2367: This comparison appears to be unintentional because the types '({ id: string; createdAt: Date; type: ReferenceSourceType; title: string; url: string; paperId: string; authors: string; sourceName: string; year: number; updatedAt: Date; ... 4 more ...; internalLabel: string; } | { ...; })[] | { ...; }[]' and 'string' have no overlap.
+src/lib/services/user-service.ts(21,11): error TS2353: Object literal may only specify known properties, and 'age' does not exist in type 'UserSelect<DefaultArgs>'.

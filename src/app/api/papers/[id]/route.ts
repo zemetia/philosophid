@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyUserInDatabase } from "@/lib/auth";
 import { PaperService } from "@/lib/services/paper-service";
+import { withAuth } from "@/backend/middleware/auth.middleware";
+import { verifyCustomToken } from "@/lib/jwt";
+import { userRepository } from "@/backend/repositories/user.repository";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const idOrSlug = params.id;
+    const { id: idOrSlug } = await params;
     const paper = await PaperService.getPaperByIdOrSlug(idOrSlug, true);
 
     if (!paper) {
@@ -16,10 +18,18 @@ export async function GET(
 
     // Security: If paper is DRAFT, only owner can see
     if (paper.status === "DRAFT") {
-      const firebaseUid = req.headers.get("x-firebase-uid");
-      const user = await verifyUserInDatabase(firebaseUid || "");
-      if (!user || user.id !== paper.authorId) {
+      const token = req.cookies.get("philosophid_session")?.value;
+      if (!token) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      try {
+        const payload = verifyCustomToken(token);
+        if (payload.uid !== paper.authorId) {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+      } catch (e) {
+        return NextResponse.json({ error: "Unauthorized: Invalid session" }, { status: 401 });
       }
     }
 
@@ -29,42 +39,24 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export const PUT = withAuth(async (req, user, { params }) => {
   try {
-    const firebaseUid = req.headers.get("x-firebase-uid");
-    const user = await verifyUserInDatabase(firebaseUid || "");
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+    const { id } = await params;
     const body = await req.json();
-    const paper = await PaperService.updatePaper(params.id, body, user.id);
+    const paper = await PaperService.updatePaper(id, body, user.id);
 
     return NextResponse.json({ data: paper });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
-}
+});
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export const DELETE = withAuth(async (req, user, { params }) => {
   try {
-    const firebaseUid = req.headers.get("x-firebase-uid");
-    const user = await verifyUserInDatabase(firebaseUid || "");
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    await PaperService.archivePaper(params.id, user.id);
+    const { id } = await params;
+    await PaperService.archivePaper(id, user.id);
     return NextResponse.json({ message: "Paper archived successfully" });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
-}
+});

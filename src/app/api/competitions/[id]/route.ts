@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { CompetitionService } from "@/lib/services/competition-service";
+import { competitionService } from "@/backend/services/competition.service";
+import { handleApiError } from "@/backend/middleware/error.middleware";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const competition = await CompetitionService.getCompetitionById(params.id);
-    if (!competition) {
-      return NextResponse.json({ error: "Competition not found" }, { status: 404 });
-    }
+    const { id } = await params;
+    const competition = await competitionService.getCompetitionById(id);
     return NextResponse.json({ data: competition });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch competition" }, { status: 500 });
+    return handleApiError(error);
   }
 }

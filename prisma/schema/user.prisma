@@ -21,8 +21,9 @@ enum EngagementLevel {
 
 model User {
   id              String           @id @default(uuid())
-  firebaseUid     String           @unique
+  firebaseUid     String?          @unique
   email           String           @unique
+  password        String?          @db.Text      // For seeded/admin users
   username        String?          @unique       // Unique identifier for /{username}
   name            String?
   avatarUrl       String?

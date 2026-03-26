@@ -12,12 +12,12 @@ export const UserService = {
         select: {
           id: true,
           name: true,
+          username: true,
           email: true,
           avatarUrl: true,
           role: true,
           score: true,
           bio: true,
-          age: true,
           birthday: true,
           location: true,
           institution: true,
@@ -72,6 +72,19 @@ export const UserService = {
   },
 
   /**
+   * Get full user profile data by username for the public profile page
+   */
+  async getUserProfileByUsername(username: string) {
+    const user = await prisma.user.findUnique({
+      where: { username },
+      select: { id: true },
+    });
+
+    if (!user) return null;
+    return this.getUserProfile(user.id);
+  },
+
+  /**
    * Syncs a Firebase user with the local database (Upsert)
    */
   async syncUserWithDatabase(firebaseUser: { 
@@ -79,8 +92,8 @@ export const UserService = {
     email?: string; 
     name?: string; 
     picture?: string;
+    username?: string;
     // Add additional fields
-    age?: number;
     birthday?: string;
     location?: string;
     institution?: string;
@@ -101,8 +114,8 @@ export const UserService = {
     const userData = {
       email: firebaseUser.email,
       name: firebaseUser.name || null,
+      username: firebaseUser.username || undefined,
       avatarUrl: firebaseUser.picture || null,
-      age: firebaseUser.age || undefined,
       birthday: firebaseUser.birthday ? new Date(firebaseUser.birthday) : undefined,
       location: firebaseUser.location || undefined,
       institution: firebaseUser.institution || undefined,

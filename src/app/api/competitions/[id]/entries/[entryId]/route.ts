@@ -1,27 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyUserInDatabase } from "@/lib/auth";
-import { CompetitionService } from "@/lib/services/competition-service";
+import { competitionService } from "@/backend/services/competition.service";
+import { withAuth } from "@/backend/middleware/auth.middleware";
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { entryId: string } }
-) {
+export const PATCH = withAuth(async (req, user, { params }) => {
   try {
-    const firebaseUid = req.headers.get("x-firebase-uid");
-    const user = await verifyUserInDatabase(firebaseUid || "");
-
-    if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized: Admin access required" }, { status: 401 });
     }
 
+    const { entryId } = await params;
     const { status } = await req.json();
     if (!status) {
       return NextResponse.json({ error: "Status is required" }, { status: 400 });
     }
 
-    const entry = await CompetitionService.updateEntryStatus(params.entryId, status);
+    const entry = await competitionService.updateEntryStatus(entryId, status);
     return NextResponse.json({ data: entry });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
-}
+});

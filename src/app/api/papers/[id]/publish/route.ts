@@ -1,20 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyUserInDatabase } from "@/lib/auth";
 import { PaperService } from "@/lib/services/paper-service";
+import { withAuth } from "@/backend/middleware/auth.middleware";
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export const PATCH = withAuth(async (req, user, { params }) => {
   try {
-    const firebaseUid = req.headers.get("x-firebase-uid");
-    const user = await verifyUserInDatabase(firebaseUid || "");
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const paper = await PaperService.requestPublish(params.id, user.id);
+    const { id } = await params;
+    const paper = await PaperService.requestPublish(id, user.id);
 
     return NextResponse.json({ 
       message: "Publication request submitted",
@@ -23,4 +14,4 @@ export async function PATCH(
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
-}
+});

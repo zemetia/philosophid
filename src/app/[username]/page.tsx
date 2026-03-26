@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  User, 
+  User as UserIcon, 
   Mail, 
   MapPin, 
   Calendar, 
@@ -17,18 +19,24 @@ import {
   Edit3, 
   Loader2,
   Save,
-  X
+  X,
+  AlertCircle,
+  FileText,
+  Trophy,
+  Award
 } from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 interface UserProfile {
   id: string;
   name: string;
+  username: string;
   email: string;
   avatarUrl: string;
   role: string;
   score: number;
   bio: string;
-  age: number;
   birthday: string;
   location: string;
   institution: string;
@@ -44,48 +52,92 @@ interface UserProfile {
   createdAt: string;
 }
 
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
-
-export default function ProfilePage() {
+export default function PublicProfilePage() {
+  const params = useParams();
+  const username = params?.username as string;
+  const router = useRouter();
+  
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [papers, setPapers] = useState<any[]>([]);
+  const [badges, setBadges] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   // Form state
   const [formData, setFormData] = useState<Partial<UserProfile>>({});
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    if (username) {
+      fetchPublicProfile(username);
+    }
+  }, [username]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        fetchProfile(user.uid);
+        setCurrentUser(user);
+        if (profile) {
+          checkOwnership(user, profile.id);
+        }
       } else {
-        setLoading(false);
-        // Maybe redirect to login if no user?
+        setCurrentUser(null);
+        setIsOwner(false);
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [profile]);
 
-  const fetchProfile = async (uid: string) => {
+  const fetchPublicProfile = async (uname: string) => {
     try {
-      const response = await fetch("/api/user/profile", {
-        headers: {
-          "x-firebase-uid": uid,
-        },
-      });
+      setLoading(true);
+      const url = `/api/user/public/${uname}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          setProfile(null);
+        } else {
+          throw new Error("Existential dread on the network");
+        }
+        return;
+      }
+      
       const result = await response.json();
       if (result.data) {
         setProfile(result.data.user);
         setFormData(result.data.user);
+        setPapers(result.data.papers || []);
+        setBadges(result.data.badges || []);
+        
+        const user = auth.currentUser;
+        if (user) {
+          checkOwnership(user, result.data.user.id);
+        }
       }
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error("Error fetching public profile:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkOwnership = async (user: any, profileUserId: string) => {
+    try {
+      // Fetch the private profile to see if it's the same person
+      const resp = await fetch("/api/user/profile");
+      if (resp.ok) {
+        const result = await resp.json();
+        if (result.data.user.id === profileUserId) {
+          setIsOwner(true);
+        }
+      }
+    } catch (err) {
+      console.error("Ownership verification failed:", err);
     }
   };
 
@@ -93,14 +145,10 @@ export default function ProfilePage() {
     setSaving(true);
     setMessage(null);
     try {
-      const user = auth.currentUser;
-      if (!user) throw new Error("Unauthorized");
-
       const response = await fetch("/api/user/profile", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-firebase-uid": user.uid,
         },
         body: JSON.stringify(formData),
       });
@@ -124,13 +172,33 @@ export default function ProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <Loader2 className="w-12 h-12 text-[#4E6E81] animate-spin mb-4" />
-        <p className="font-space-grotesk text-[#4E6E81] animate-pulse">Syncing persona...</p>
+        <p className="font-space-grotesk text-[#4E6E81] animate-pulse">Navigating the user manifold...</p>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="max-w-xl mx-auto py-20 text-center space-y-6">
+        <div className="bg-[#F4F2ED] w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+          <AlertCircle className="w-12 h-12 text-[#4E6E81]" />
+        </div>
+        <h1 className="text-4xl font-literata font-bold text-[#1A1A1A]">Philosopher Missing</h1>
+        <p className="font-space-grotesk text-[#4E6E81] text-lg leading-relaxed">
+           The path <code className="bg-gray-100 px-2 py-1 rounded">/{username}</code> does not lead to an existing axiom in our database.
+        </p>
+        <button 
+          onClick={() => router.push("/")}
+          className="px-8 py-3 bg-[#4E6E81] text-white rounded-2xl font-space-grotesk hover:bg-[#3D5A6C] transition-all shadow-lg shadow-[#4E6E81]/20"
+        >
+          Return to Logos
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-12">
+    <div className="max-w-5xl mx-auto px-4 space-y-8 pb-12 pt-8">
       {/* Header Section */}
       <section className="relative overflow-hidden rounded-3xl bg-white border border-[#E5E7EB] shadow-sm">
         <div className="h-32 bg-gradient-to-r from-[#4E6E81] to-[#2C3E50] opacity-10"></div>
@@ -141,7 +209,7 @@ export default function ProfilePage() {
                 <img src={profile.avatarUrl} alt={profile.name} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-[#F4F2ED]">
-                  <User className="w-12 h-12 text-[#4E6E81]" />
+                  <UserIcon className="w-12 h-12 text-[#4E6E81]" />
                 </div>
               )}
             </div>
@@ -161,20 +229,22 @@ export default function ProfilePage() {
                 </p>
               </div>
               
-              <button 
-                onClick={() => setIsEditing(!isEditing)}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-space-grotesk transition-all duration-300 active:scale-95 ${
-                  isEditing 
-                  ? "bg-[#F4F2ED] text-[#4E6E81] hover:bg-gray-200" 
-                  : "bg-[#4E6E81] text-white hover:bg-[#3D5A6C] shadow-md shadow-[#4E6E81]/20"
-                }`}
-              >
-                {isEditing ? (
-                  <><X className="w-4 h-4" /> Cancel</>
-                ) : (
-                  <><Edit3 className="w-4 h-4" /> Edit Profile</>
-                )}
-              </button>
+              {isOwner && (
+                <button 
+                  onClick={() => setIsEditing(!isEditing)}
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-space-grotesk transition-all duration-300 active:scale-95 ${
+                    isEditing 
+                    ? "bg-[#F4F2ED] text-[#4E6E81] hover:bg-gray-200" 
+                    : "bg-[#4E6E81] text-white hover:bg-[#3D5A6C] shadow-md shadow-[#4E6E81]/20"
+                  }`}
+                >
+                  {isEditing ? (
+                    <><X className="w-4 h-4" /> Cancel</>
+                  ) : (
+                    <><Edit3 className="w-4 h-4" /> Edit Profile</>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -240,6 +310,23 @@ export default function ProfilePage() {
                     />
                   ) : (
                     <p className="font-space-grotesk font-medium text-[#1A1A1A]">{profile?.favoritePhilosopher || "Undecided"}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold font-space-grotesk uppercase tracking-widest text-[#9CA3AF]">Username</label>
+                  {isEditing ? (
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] font-space-grotesk">@</span>
+                      <input 
+                        type="text"
+                        value={formData.username || ""}
+                        onChange={(e) => setFormData({...formData, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')})}
+                        placeholder="your_unique_id"
+                        className="w-full bg-[#F4F2ED] border-none rounded-xl p-3 pl-8 font-space-grotesk focus:ring-2 focus:ring-[#4E6E81]/20 transition-all outline-none"
+                      />
+                    </div>
+                  ) : (
+                    <p className="font-space-grotesk font-medium text-[#1A1A1A]">@{profile?.username || "identity_not_forged"}</p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -319,10 +406,98 @@ export default function ProfilePage() {
               )}
             </div>
           </motion.div>
+
+          <motion.div 
+            layout
+            className="bg-white rounded-3xl border border-[#E5E7EB] p-8 shadow-sm space-y-6"
+          >
+            <div className="flex items-center justify-between border-b border-[#F4F2ED] pb-4">
+              <div className="flex items-center gap-3">
+                <FileText className="w-5 h-5 text-[#4E6E81]" />
+                <h2 className="text-xl font-literata font-bold">Selected Publications</h2>
+              </div>
+              <span className="text-xs font-bold font-space-grotesk text-[#9CA3AF] uppercase tracking-widest">
+                {papers.length} Works
+              </span>
+            </div>
+
+            {papers.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {papers.map((paper) => (
+                  <Link 
+                    key={paper.id} 
+                    href={`/article/${paper.slug || paper.id}`}
+                    className="group bg-[#F4F2ED] hover:bg-[#4E6E81] p-5 rounded-2xl transition-all duration-300 flex flex-col justify-between gap-4"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-[#4E6E81] group-hover:text-white/80 bg-white/50 group-hover:bg-black/20 px-2 py-0.5 rounded">
+                          {paper.type}
+                        </span>
+                      </div>
+                      <h3 className="font-literata font-bold text-[#1A1A1A] group-hover:text-white leading-tight">
+                        {paper.title}
+                      </h3>
+                    </div>
+                    <div className="flex items-center justify-between mt-auto">
+                      <p className="text-[10px] text-[#9CA3AF] group-hover:text-white/60 font-space-grotesk">
+                        {new Date(paper.createdAt).toLocaleDateString()}
+                      </p>
+                      <Sparkles className="w-4 h-4 text-[#4E6E81] group-hover:text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center bg-[#F4F2ED] rounded-2xl border-2 border-dashed border-black/5">
+                <p className="font-space-grotesk text-sm text-[#9CA3AF] italic">
+                  This philosopher is yet to publish their axioms.
+                </p>
+              </div>
+            )}
+          </motion.div>
         </div>
 
         {/* Right Column: Meta Info & Socials */}
         <div className="space-y-8">
+          <div className="bg-white rounded-3xl border border-[#E5E7EB] p-8 shadow-sm space-y-6">
+            <div className="flex items-center justify-between border-b border-[#F4F2ED] pb-4">
+              <div className="flex items-center gap-3">
+                <Trophy className="w-5 h-5 text-[#4E6E81]" />
+                <h2 className="text-xl font-literata font-bold">Badgeshelf</h2>
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap gap-4">
+              {badges.length > 0 ? (
+                badges.map((badge) => (
+                  <div 
+                    key={badge.id} 
+                    className="group relative"
+                    title={`${badge.name}: ${badge.description}`}
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-[#F4F2ED] flex items-center justify-center p-2 hover:bg-[#4E6E81] transition-all cursor-help hover:scale-105">
+                      {badge.iconUrl ? (
+                        <img src={badge.iconUrl} alt={badge.name} className="w-full h-full object-contain" />
+                      ) : (
+                        <Award className="w-6 h-6 text-[#4E6E81] group-hover:text-white" />
+                      )}
+                    </div>
+                    {/* Minimal Tooltip on Hover */}
+                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap uppercase tracking-widest">
+                      {badge.name}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="w-full py-6 text-center bg-[#F4F2ED]/50 rounded-2xl border-2 border-dashed border-black/5">
+                  <p className="font-space-grotesk text-[10px] uppercase tracking-widest text-[#9CA3AF]">
+                    No accolades yet
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
           <div className="bg-white rounded-3xl border border-[#E5E7EB] p-8 shadow-sm space-y-6">
             <div className="flex items-center gap-3 border-b border-[#F4F2ED] pb-4">
               <Mail className="w-5 h-5 text-[#4E6E81]" />
@@ -330,15 +505,18 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-6">
-              <div className="flex items-center gap-4 group">
-                <div className="w-10 h-10 rounded-xl bg-[#F4F2ED] flex items-center justify-center text-[#4E6E81] group-hover:bg-[#4E6E81] group-hover:text-white transition-colors">
-                  <Mail className="w-4 h-4" />
+              {/* Only show email if it's the owner or if public profile provides it */}
+              {(isOwner || profile?.email) && (
+                <div className="flex items-center gap-4 group">
+                  <div className="w-10 h-10 rounded-xl bg-[#F4F2ED] flex items-center justify-center text-[#4E6E81] group-hover:bg-[#4E6E81] group-hover:text-white transition-colors">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[10px] uppercase tracking-widest font-bold text-[#9CA3AF]">Email</p>
+                    <p className="text-sm font-space-grotesk text-[#1A1A1A]">{profile?.email}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-[10px] uppercase tracking-widest font-bold text-[#9CA3AF]">Email</p>
-                  <p className="text-sm font-space-grotesk text-[#1A1A1A]">{profile?.email}</p>
-                </div>
-              </div>
+              )}
 
               <div className="flex items-center gap-4 group">
                 <div className="w-10 h-10 rounded-xl bg-[#F4F2ED] flex items-center justify-center text-[#4E6E81] group-hover:bg-[#4E6E81] group-hover:text-white transition-colors">
@@ -380,24 +558,27 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 group">
-                <div className="w-10 h-10 rounded-xl bg-[#F4F2ED] flex items-center justify-center text-[#4E6E81] group-hover:bg-[#4E6E81] group-hover:text-white transition-colors">
-                  <Phone className="w-4 h-4" />
+              {/* Only show phone if owner or public profile provides it */}
+              {(isOwner || profile?.phone) && (
+                <div className="flex items-center gap-4 group">
+                  <div className="w-10 h-10 rounded-xl bg-[#F4F2ED] flex items-center justify-center text-[#4E6E81] group-hover:bg-[#4E6E81] group-hover:text-white transition-colors">
+                    <Phone className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[10px] uppercase tracking-widest font-bold text-[#9CA3AF]">Telos (Phone)</p>
+                    {isEditing ? (
+                      <input 
+                        type="text"
+                        value={formData.phone || ""}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        className="w-full bg-[#F4F2ED] border-none rounded-lg p-1 text-sm font-space-grotesk outline-none"
+                      />
+                    ) : (
+                      <p className="text-sm font-space-grotesk text-[#1A1A1A]">{profile?.phone || "-"}</p>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-[10px] uppercase tracking-widest font-bold text-[#9CA3AF]">Telos (Phone)</p>
-                  {isEditing ? (
-                    <input 
-                      type="text"
-                      value={formData.phone || ""}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      className="w-full bg-[#F4F2ED] border-none rounded-lg p-1 text-sm font-space-grotesk outline-none"
-                    />
-                  ) : (
-                    <p className="text-sm font-space-grotesk text-[#1A1A1A]">{profile?.phone || "-"}</p>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -452,7 +633,7 @@ export default function ProfilePage() {
               <button 
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-6 py-2 bg-[#4E6E81] text-white rounded-xl font-space-grotesk text-sm hover:hover:bg-[#3D5A6C] disabled:opacity-50 transition-all font-bold"
+                className="flex items-center gap-2 px-6 py-2 bg-[#4E6E81] text-white rounded-xl font-space-grotesk text-sm hover:bg-[#3D5A6C] disabled:opacity-50 transition-all font-bold"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Commit Changes

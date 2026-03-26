@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyUserInDatabase } from "@/lib/auth";
 import { PaperService } from "@/lib/services/paper-service";
+import { withAuth } from "@/backend/middleware/auth.middleware";
 
-export async function GET(req: NextRequest) {
+export const GET = withAuth(async (req, user) => {
   try {
-    const firebaseUid = req.headers.get("x-firebase-uid");
-    const user = await verifyUserInDatabase(firebaseUid || "");
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { searchParams } = new URL(req.url);
     
     // For "My Papers", we want ALL statuses (Draft, Published, etc)
@@ -26,4 +19,4 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: "Fetch failed" }, { status: 500 });
   }
-}
+});

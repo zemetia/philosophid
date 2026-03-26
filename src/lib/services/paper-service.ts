@@ -215,7 +215,7 @@ export const PaperService = {
   async archivePaper(id: string, userId: string) {
     const existing = await prisma.paper.findUnique({
       where: { id },
-      select: { authorId: true, role: { select: { role: true } } } as any, // Admin can archive too
+      select: { authorId: true },
     });
 
     // Note: author check is enough for now, admin check usually handled at route level

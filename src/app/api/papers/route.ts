@@ -1,25 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { verifyUserInDatabase } from "@/lib/auth";
-import { PaperService } from "@/lib/services/paper-service";
+import { withAuth } from "@/backend/middleware/auth.middleware";
+import { paperService } from "@/backend/services/paper.service";
+import { handleApiError } from "@/backend/middleware/error.middleware";
 
-export async function POST(req: NextRequest) {
+export const POST = withAuth(async (req: NextRequest, user) => {
   try {
-    const firebaseUid = req.headers.get("x-firebase-uid");
-    const user = await verifyUserInDatabase(firebaseUid || "");
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const body = await req.json();
     const { title, content, type, excerpt, coverImageUrl, tags, competitionId } = body;
 
-    if (!title || !content) {
-      return NextResponse.json({ error: "Title and content are required" }, { status: 400 });
-    }
-
-    const paper = await PaperService.createPaper({
+    const paper = await paperService.createPaper({
       title,
       content,
       type: type || "ARTICLE",
@@ -31,11 +20,10 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ data: paper }, { status: 201 });
-  } catch (error: any) {
-    console.error("Create Paper Error:", error);
-    return NextResponse.json({ error: error.message || "Failed to create paper" }, { status: 500 });
+  } catch (error) {
+    return handleApiError(error);
   }
-}
+});
 
 export async function GET(req: NextRequest) {
   try {
@@ -50,10 +38,10 @@ export async function GET(req: NextRequest) {
       sortOrder: (searchParams.get("sortOrder") || "desc") as any,
     };
 
-    const result = await PaperService.getPapers(filters);
-    return NextResponse.json(result);
+    const result = await paperService.getPapers(filters);
+    return NextResponse.json({ data: result.data, meta: result.meta });
   } catch (error) {
-    return NextResponse.json({ error: "Fetch failed" }, { status: 500 });
+    return handleApiError(error);
   }
 }
 

@@ -1,0 +1,41 @@
+??? Next.js 16.1.4 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+??? Compiled successfully in 9.8s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+node.exe : Error: Failed to parse private key: Error: Invalid PEM formatted message.
+At D:\Kerja\Philosophid\Website\node_modules\.bin\next.ps1:24 char:5
++     & "node$exe"  "$basedir/../next/dist/bin/next" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Error: Failed t...matted message.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    at t (D:\Kerja\Philosophid\Website\.next\server\chunks\[root-of-the-server]__42fce263._.js:1:18379)
+    at module evaluation (D:\Kerja\Philosophid\Website\.next\server\chunks\[root-of-the-server]__42fce263._.js:1:18629)
+    at instantiateModule (D:\Kerja\Philosophid\Website\.next\server\chunks\[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (D:\Kerja\Philosophid\Website\.next\server\chunks\[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (D:\Kerja\Philosophid\Website\.next\server\chunks\[turbopack]_runtime.js:228:20)
+    at module evaluation (D:\Kerja\Philosophid\Website\.next\server\chunks\[root-of-the-server]__0134e1b5._.js:1:1264)
+    at instantiateModule (D:\Kerja\Philosophid\Website\.next\server\chunks\[turbopack]_runtime.js:740:9) {
+  errorInfo: [Object],
+  codePrefix: 'app'
+}
+Error: Failed to parse private key: Error: Invalid PEM formatted message.
+    at t (D:\Kerja\Philosophid\Website\.next\server\chunks\[root-of-the-server]__42fce263._.js:1:18379)
+    at module evaluation (D:\Kerja\Philosophid\Website\.next\server\chunks\[root-of-the-server]__42fce263._.js:1:18629)
+    at instantiateModule (D:\Kerja\Philosophid\Website\.next\server\chunks\[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (D:\Kerja\Philosophid\Website\.next\server\chunks\[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (D:\Kerja\Philosophid\Website\.next\server\chunks\[turbopack]_runtime.js:228:20)
+    at module evaluation (D:\Kerja\Philosophid\Website\.next\server\chunks\[root-of-the-server]__edfc67e9._.js:1:7774)
+    at instantiateModule (D:\Kerja\Philosophid\Website\.next\server\chunks\[turbopack]_runtime.js:740:9) {
+  errorInfo: [Object],
+  codePrefix: 'app'
+}
+
+> Build error occurred
+Error: Failed to collect page data for /api/auth/me
+    at ignore-listed frames {
+  type: 'Error'
+}

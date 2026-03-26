@@ -1,54 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyUserInDatabase } from "@/lib/auth";
-import { UserService } from "@/lib/services/user-service";
+import { withAuth } from "@/backend/middleware/auth.middleware";
+import { userService } from "@/backend/services/user.service";
+import { handleApiError } from "@/backend/middleware/error.middleware";
 
-export async function GET(req: NextRequest) {
+export const GET = withAuth(async (req: NextRequest, user) => {
   try {
-    const firebaseUid = req.headers.get("x-firebase-uid");
-    const user = await verifyUserInDatabase(firebaseUid || "");
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const profileData = await UserService.getUserProfile(user.id);
-    
-    if (!profileData) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
-    }
-
+    const profileData = await userService.getUserProfile(user.id);
     return NextResponse.json({ data: profileData });
   } catch (error) {
-    console.error("Fetch Profile Error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch profile" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
-}
+});
 
-export async function PATCH(req: NextRequest) {
+export const PATCH = withAuth(async (req: NextRequest, user) => {
   try {
-    const firebaseUid = req.headers.get("x-firebase-uid");
-    const user = await verifyUserInDatabase(firebaseUid || "");
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
     const body = await req.json();
     
     // Update user profile
-    const updatedUser = await UserService.syncUserWithDatabase({
+    const updatedUser = await userService.syncUserWithDatabase({
       uid: user.firebaseUid,
       email: user.email,
       ...body
@@ -59,10 +28,6 @@ export async function PATCH(req: NextRequest) {
       data: updatedUser 
     });
   } catch (error) {
-    console.error("Update Profile Error:", error);
-    return NextResponse.json(
-      { error: "Failed to update profile" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
-}
+});

@@ -3,6 +3,9 @@ import { getAuthUser } from "@/lib/auth-server";
 import { UserService } from "@/lib/services/user-service";
 import { signCustomToken } from "@/lib/jwt";
 
+export const dynamic = 'force-dynamic';
+
+
 export async function POST(req: NextRequest) {
   try {
     const firebaseUser = await getAuthUser();

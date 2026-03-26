@@ -1,19 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyUserInDatabase } from "@/lib/auth";
 import { PaperService } from "@/lib/services/paper-service";
+import { withAuth } from "@/backend/middleware/auth.middleware";
 
-export async function GET(req: NextRequest) {
+export const GET = withAuth(async (req, user) => {
   try {
-    const firebaseUid = req.headers.get("x-firebase-uid");
-    const user = await verifyUserInDatabase(firebaseUid || "");
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
     const analytics = await PaperService.getUserAnalytics(user.id);
     return NextResponse.json({ data: analytics });
   } catch (error) {
@@ -23,4 +13,4 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
